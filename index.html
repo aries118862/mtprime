@@ -55,14 +55,15 @@
         }
         
         .form-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             transition: all 0.3s ease;
         }
         
         .form-input:focus {
             border-color: var(--primary-green);
             box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+            background: rgba(255, 255, 255, 0.1);
         }
         
         .google-btn {
@@ -93,9 +94,10 @@
         }
         
         .auth-card {
-            backdrop-filter: blur(10px);
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
         
         .success-message {
@@ -138,16 +140,19 @@
             position: relative;
         }
         
-        .input-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.5);
+        .video-container {
+            position: relative;
+            overflow: hidden;
         }
         
-        .input-with-icon {
-            padding-left: 45px;
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, 
+                rgba(15, 23, 42, 0.8) 0%, 
+                rgba(15, 23, 42, 0.6) 50%, 
+                rgba(15, 23, 42, 0.8) 100%);
+            pointer-events: none;
         }
         
         .toggle-password {
@@ -159,58 +164,30 @@
             border: none;
             color: rgba(255, 255, 255, 0.5);
             cursor: pointer;
+            z-index: 10;
         }
         
-        /* Video enhancements */
-        .video-container {
-            position: relative;
-            overflow: hidden;
+        .form-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .video-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(45deg, 
-                rgba(15, 23, 42, 0.7) 0%, 
-                rgba(15, 23, 42, 0.4) 50%, 
-                rgba(15, 23, 42, 0.7) 100%);
-            pointer-events: none;
+        @media (min-width: 1024px) {
+            .form-container {
+                min-height: auto;
+                margin-top: 2rem;
+            }
         }
         
-        .video-highlight {
-            animation: pulse 2s infinite;
+        .brand-highlight {
+            animation: glow 2s ease-in-out infinite alternate;
         }
         
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(39, 174, 96, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
-        }
-        
-        .premium-badge {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .premium-badge::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 30%,
-                rgba(255, 255, 255, 0.1) 50%,
-                transparent 70%
-            );
-            animation: shine 3s infinite linear;
-        }
-        
-        @keyframes shine {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(39, 174, 96, 0.5); }
+            to { text-shadow: 0 0 15px rgba(39, 174, 96, 0.8); }
         }
     </style>
 </head>
@@ -218,26 +195,23 @@
     <!-- Main Container -->
     <div class="min-h-screen flex flex-col">
         <!-- Navigation -->
-        <nav class="bg-gray-900/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-800">
-            <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-                <!-- Logo - UPDATED: Replaced triangle with logo.png -->
-                <div class="flex items-center space-x-2">
+        <nav class="bg-gray-900/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-800">
+            <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
                         <img src="logo.png" alt="mtprime logo" class="w-full h-full object-contain">
                     </div>
                     <div class="logo-font text-2xl font-bold">
-                        <span class="text-white">mt</span><span class="text-green-500">prime</span>
+                        <span class="text-white">mt</span><span class="text-green-500 brand-highlight">prime</span>
                     </div>
                 </div>
                 
-                <!-- Auth Links -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <button onclick="showLogin()" class="px-6 py-2 gradient-bg rounded-full font-semibold hover:opacity-90 transition">
-                        Sign In
-                    </button>
-                    <button onclick="showRegister()" class="px-6 py-2 bg-gray-800 rounded-full font-semibold hover:bg-gray-700 transition flex items-center space-x-2">
-                        <span>Get Started</span>
-                        <i class="fas fa-arrow-right text-sm"></i>
+                <!-- Auth Links - Simplified -->
+                <div class="hidden md:flex items-center space-x-3">
+                    <span class="text-gray-400">Not a member?</span>
+                    <button onclick="showRegister()" class="px-5 py-2 gradient-bg rounded-full font-semibold hover:opacity-90 transition text-sm">
+                        Sign Up
                     </button>
                 </div>
                 
@@ -256,268 +230,181 @@
                         Sign In
                     </button>
                     <button onclick="showRegister()" class="w-full py-3 bg-gray-800 rounded-lg font-semibold hover:bg-gray-700 transition">
-                        Get Started
+                        Sign Up
                     </button>
                 </div>
             </div>
         </nav>
 
-        <!-- Hero Section -->
+        <!-- Hero Section with Form Priority -->
         <section class="relative flex-grow overflow-hidden">
-            <!-- Background Video - ENHANCED VISIBILITY -->
+            <!-- Background Video -->
             <div class="absolute inset-0 z-0 video-container">
-                <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-70">
+                <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-50">
                     <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
                 </video>
                 <div class="video-overlay"></div>
             </div>
             
-            <div class="relative z-10 container mx-auto px-4 py-12">
-                <div class="max-w-6xl mx-auto">
-                    <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
-                        <!-- Left Content -->
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-block mb-6">
-                                <span class="premium-badge px-4 py-2 gradient-bg rounded-full font-semibold text-sm">
-                                    <i class="fas fa-crown mr-2"></i>PREMIUM STREAMING
-                                </span>
-                            </div>
-                            
-                            <h1 class="text-5xl lg:text-7xl font-bold mb-6">
-                                <span class="gradient-text">Experience</span><br>
-                                <span class="text-white">Cinematic Quality</span>
-                            </h1>
-                            
-                            <p class="text-xl text-gray-300 mb-8 max-w-2xl">
-                                Immerse yourself in premium streaming with thousands of movies, series, and exclusive originals in stunning 4K. 
-                                Watch anywhere, anytime.
-                            </p>
-                            
-                            <div class="flex flex-wrap gap-4 justify-center lg:justify-start mb-8">
-                                <div class="flex items-center space-x-2 px-4 py-2 bg-gray-800/50 rounded-lg">
-                                    <i class="fas fa-play-circle text-green-400"></i>
-                                    <span>No Ads</span>
+            <div class="relative z-10">
+                <div class="container mx-auto px-4 py-8">
+                    <!-- Form First Approach -->
+                    <div class="flex flex-col lg:flex-row items-start justify-center gap-8 lg:gap-16">
+                        <!-- Auth Card - PROMINENT POSITION -->
+                        <div class="w-full lg:w-5/12 xl:w-4/12 order-1 lg:order-1">
+                            <div class="sticky top-24">
+                                <div id="authCard" class="auth-card rounded-2xl p-8 mb-8">
+                                    <div class="text-center mb-8">
+                                        <h2 id="authTitle" class="text-3xl font-bold mb-2">Welcome to mtprime</h2>
+                                        <p id="authSubtitle" class="text-gray-400">Sign in to continue streaming</p>
+                                    </div>
+                                    
+                                    <!-- Dynamic Content will be loaded here -->
+                                    <div id="authContent" class="space-y-6">
+                                        <!-- Content loaded by JavaScript -->
+                                    </div>
                                 </div>
-                                <div class="flex items-center space-x-2 px-4 py-2 bg-gray-800/50 rounded-lg">
-                                    <i class="fas fa-hd text-green-400"></i>
-                                    <span>4K Ultra HD</span>
-                                </div>
-                                <div class="flex items-center space-x-2 px-4 py-2 bg-gray-800/50 rounded-lg">
-                                    <i class="fas fa-mobile-alt text-green-400"></i>
-                                    <span>Multiple Devices</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Video Preview -->
-                            <div class="mb-8 max-w-xl">
-                                <div class="relative rounded-lg overflow-hidden border border-gray-700 shadow-2xl">
-                                    <video autoplay muted loop playsinline class="w-full h-48 object-cover">
-                                        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
-                                    </video>
-                                    <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                                        <div>
-                                            <p class="font-semibold">Sample Preview</p>
-                                            <p class="text-sm text-gray-300">4K • Dolby Atmos</p>
-                                        </div>
-                                        <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center video-highlight">
-                                            <i class="fas fa-play"></i>
-                                        </div>
+                                
+                                <!-- Quick Stats -->
+                                <div class="grid grid-cols-3 gap-3 text-center mt-6">
+                                    <div class="p-3 bg-gray-800/40 rounded-lg">
+                                        <p class="text-lg font-bold text-green-400">10K+</p>
+                                        <p class="text-xs text-gray-400">Movies</p>
+                                    </div>
+                                    <div class="p-3 bg-gray-800/40 rounded-lg">
+                                        <p class="text-lg font-bold text-green-400">5K+</p>
+                                        <p class="text-xs text-gray-400">Series</p>
+                                    </div>
+                                    <div class="p-3 bg-gray-800/40 rounded-lg">
+                                        <p class="text-lg font-bold text-green-400">50M+</p>
+                                        <p class="text-xs text-gray-400">Users</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Auth Card -->
-                        <div class="w-full lg:w-96">
-                            <div id="authCard" class="auth-card rounded-2xl p-8 shadow-2xl card-hover border border-green-500/20">
-                                <!-- Dynamic Content will be loaded here -->
-                                <div id="authContent" class="space-y-6">
-                                    <!-- Content loaded by JavaScript -->
+                        <!-- Hero Content - SECONDARY POSITION -->
+                        <div class="w-full lg:w-7/12 xl:w-8/12 order-2 lg:order-2">
+                            <div class="text-center lg:text-left">
+                                <div class="inline-block mb-6">
+                                    <span class="px-4 py-2 gradient-bg rounded-full font-semibold text-sm">
+                                        <i class="fas fa-crown mr-2"></i>PREMIUM STREAMING
+                                    </span>
+                                </div>
+                                
+                                <h1 class="text-4xl lg:text-6xl font-bold mb-6">
+                                    <span class="gradient-text">Experience</span><br>
+                                    <span class="text-white">Cinematic Quality</span>
+                                </h1>
+                                
+                                <p class="text-lg text-gray-300 mb-8 max-w-3xl">
+                                    Immerse yourself in premium streaming with thousands of movies, series, and exclusive originals in stunning 4K. 
+                                    Watch anywhere, anytime.
+                                </p>
+                                
+                                <!-- Features -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                                    <div class="flex items-center space-x-3 p-4 bg-gray-800/40 rounded-xl">
+                                        <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-play-circle"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold">No Ads</p>
+                                            <p class="text-sm text-gray-400">Uninterrupted viewing</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-3 p-4 bg-gray-800/40 rounded-xl">
+                                        <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-hd"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold">4K Ultra HD</p>
+                                            <p class="text-sm text-gray-400">Cinematic quality</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-3 p-4 bg-gray-800/40 rounded-xl">
+                                        <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-download"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold">Offline Viewing</p>
+                                            <p class="text-sm text-gray-400">Watch anywhere</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Video Preview -->
+                                <div class="mb-8 max-w-2xl">
+                                    <div class="relative rounded-xl overflow-hidden border border-gray-700 shadow-2xl">
+                                        <video autoplay muted loop playsinline class="w-full h-56 object-cover">
+                                            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
+                                        </video>
+                                        <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                                            <div>
+                                                <p class="font-semibold">Sample Preview</p>
+                                                <p class="text-sm text-gray-300">4K • Dolby Atmos</p>
+                                            </div>
+                                            <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- More Features -->
+                                <div class="bg-gray-800/30 rounded-xl p-6 mb-8">
+                                    <h3 class="text-xl font-bold mb-4">Why Choose mtprime?</h3>
+                                    <div class="space-y-3">
+                                        <div class="flex items-start space-x-3">
+                                            <i class="fas fa-check text-green-400 mt-1"></i>
+                                            <div>
+                                                <p class="font-medium">Exclusive Content</p>
+                                                <p class="text-sm text-gray-400">Original movies and series you won't find anywhere else</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start space-x-3">
+                                            <i class="fas fa-check text-green-400 mt-1"></i>
+                                            <div>
+                                                <p class="font-medium">Watch Anywhere</p>
+                                                <p class="text-sm text-gray-400">Stream on any device with seamless synchronization</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start space-x-3">
+                                            <i class="fas fa-check text-green-400 mt-1"></i>
+                                            <div>
+                                                <p class="font-medium">Family Sharing</p>
+                                                <p class="text-sm text-gray-400">Up to 5 profiles with personalized recommendations</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <!-- Stats -->
-                            <div class="mt-6 grid grid-cols-3 gap-4 text-center">
-                                <div class="p-4 bg-gray-800/30 rounded-lg">
-                                    <p class="text-2xl font-bold text-green-400">10K+</p>
-                                    <p class="text-sm text-gray-400">Movies</p>
-                                </div>
-                                <div class="p-4 bg-gray-800/30 rounded-lg">
-                                    <p class="text-2xl font-bold text-green-400">5K+</p>
-                                    <p class="text-sm text-gray-400">Series</p>
-                                </div>
-                                <div class="p-4 bg-gray-800/30 rounded-lg">
-                                    <p class="text-2xl font-bold text-green-400">50M+</p>
-                                    <p class="text-sm text-gray-400">Users</p>
-                                </div>
-                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section class="py-16 bg-gradient-to-b from-gray-900 to-gray-950">
-            <div class="container mx-auto px-4">
-                <h2 class="text-3xl font-bold text-center mb-4">Why Choose mtprime?</h2>
-                <p class="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-                    Experience the future of streaming with cutting-edge features and premium content
-                </p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- Feature 1 -->
-                    <div class="bg-gradient-to-br from-gray-800/30 to-gray-900/30 rounded-xl p-6 card-hover border border-gray-700/50">
-                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-4">
-                            <i class="fas fa-film text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3">Exclusive Content</h3>
-                        <p class="text-gray-400">Access original movies and series you won't find anywhere else, updated weekly.</p>
-                    </div>
-                    
-                    <!-- Feature 2 -->
-                    <div class="bg-gradient-to-br from-gray-800/30 to-gray-900/30 rounded-xl p-6 card-hover border border-gray-700/50">
-                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-4">
-                            <i class="fas fa-tv text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3">Watch Anywhere</h3>
-                        <p class="text-gray-400">Stream on your phone, tablet, laptop, and TV with seamless synchronization.</p>
-                    </div>
-                    
-                    <!-- Feature 3 -->
-                    <div class="bg-gradient-to-br from-gray-800/30 to-gray-900/30 rounded-xl p-6 card-hover border border-gray-700/50">
-                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-4">
-                            <i class="fas fa-download text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3">Download & Go</h3>
-                        <p class="text-gray-400">Download your favorites to watch offline wherever you are, no internet needed.</p>
-                    </div>
-                </div>
-                
-                <!-- Video Showcase -->
-                <div class="mt-16">
-                    <h3 class="text-2xl font-bold text-center mb-8">Preview Our Content</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Preview 1 -->
-                        <div class="relative rounded-lg overflow-hidden card-hover group cursor-pointer">
-                            <video autoplay muted loop playsinline class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" type="video/mp4">
-                            </video>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4">
-                                <h4 class="font-semibold">Action Packed</h4>
-                                <p class="text-sm text-gray-300">Thrilling adventures</p>
-                            </div>
-                            <div class="absolute top-4 right-4 w-10 h-10 bg-gray-900/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <i class="fas fa-play text-green-400"></i>
-                            </div>
-                        </div>
-                        
-                        <!-- Preview 2 -->
-                        <div class="relative rounded-lg overflow-hidden card-hover group cursor-pointer">
-                            <video autoplay muted loop playsinline class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4">
-                            </video>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4">
-                                <h4 class="font-semibold">Sci-Fi Epic</h4>
-                                <p class="text-sm text-gray-300">Futuristic adventures</p>
-                            </div>
-                            <div class="absolute top-4 right-4 w-10 h-10 bg-gray-900/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <i class="fas fa-play text-green-400"></i>
-                            </div>
-                        </div>
-                        
-                        <!-- Preview 3 -->
-                        <div class="relative rounded-lg overflow-hidden card-hover group cursor-pointer">
-                            <video autoplay muted loop playsinline class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" type="video/mp4">
-                            </video>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4">
-                                <h4 class="font-semibold">Fantasy World</h4>
-                                <p class="text-sm text-gray-300">Magical journeys</p>
-                            </div>
-                            <div class="absolute top-4 right-4 w-10 h-10 bg-gray-900/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <i class="fas fa-play text-green-400"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Testimonials -->
-        <section class="py-16 bg-gray-900/50">
-            <div class="container mx-auto px-4">
-                <h2 class="text-3xl font-bold text-center mb-12">What Our Users Say</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- Testimonial 1 -->
-                    <div class="bg-gray-800/30 rounded-xl p-6">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center mr-4">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold">Alex Johnson</h4>
-                                <p class="text-sm text-green-400">Premium Subscriber</p>
-                            </div>
-                        </div>
-                        <p class="text-gray-300 italic">"The video quality is amazing! 4K streaming looks incredible on my home theater."</p>
-                    </div>
-                    
-                    <!-- Testimonial 2 -->
-                    <div class="bg-gray-800/30 rounded-xl p-6">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center mr-4">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold">Sarah Chen</h4>
-                                <p class="text-sm text-green-400">Movie Enthusiast</p>
-                            </div>
-                        </div>
-                        <p class="text-gray-300 italic">"Love the exclusive content! The video previews convinced me to subscribe immediately."</p>
-                    </div>
-                    
-                    <!-- Testimonial 3 -->
-                    <div class="bg-gray-800/30 rounded-xl p-6">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center mr-4">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold">Mike Rodriguez</h4>
-                                <p class="text-sm text-green-400">Family Plan User</p>
-                            </div>
-                        </div>
-                        <p class="text-gray-300 italic">"Perfect for family movie nights. The kids love the animated content in high quality!"</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Footer -->
-        <footer class="bg-gray-900/80 border-t border-gray-800">
+        <footer class="bg-gray-900/90 border-t border-gray-800 mt-12">
             <div class="container mx-auto px-4 py-8">
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <div class="mb-6 md:mb-0">
                         <div class="logo-font text-2xl font-bold mb-2">
                             <span class="text-white">mt</span><span class="text-green-500">prime</span>
                         </div>
-                        <p class="text-gray-400">Premium streaming for everyone. Start your free trial today!</p>
+                        <p class="text-gray-400">Premium streaming for everyone.</p>
                     </div>
                     
                     <div class="flex space-x-6">
-                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter mr-2"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook mr-2"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram mr-2"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-youtube mr-2"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Terms of Service</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Help Center</a>
                     </div>
                 </div>
                 
                 <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
-                    <p>© 2023 mtprime Streaming. All rights reserved. | <a href="#" class="hover:text-white transition">Privacy Policy</a> | <a href="#" class="hover:text-white transition">Terms of Service</a></p>
+                    <p>© 2023 mtprime Streaming. All rights reserved.</p>
                 </div>
             </div>
         </footer>
@@ -566,6 +453,8 @@
         // DOM Elements
         const authCard = document.getElementById('authCard');
         const authContent = document.getElementById('authContent');
+        const authTitle = document.getElementById('authTitle');
+        const authSubtitle = document.getElementById('authSubtitle');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const messageToast = document.getElementById('messageToast');
         const toastIcon = document.getElementById('toastIcon');
@@ -576,6 +465,23 @@
         let currentForm = 'login';
         let passwordVisible = false;
         let confirmPasswordVisible = false;
+
+        // Custom Firebase Error Messages
+        const errorMessages = {
+            'auth/invalid-email': 'Please enter a valid email address',
+            'auth/user-disabled': 'This account has been disabled',
+            'auth/user-not-found': 'No account found with this email',
+            'auth/wrong-password': 'Incorrect password. Please try again',
+            'auth/email-already-in-use': 'This email is already registered. Please sign in instead',
+            'auth/weak-password': 'Password is too weak. Use at least 6 characters',
+            'auth/operation-not-allowed': 'Email/password accounts are not enabled',
+            'auth/too-many-requests': 'Too many attempts. Please try again later',
+            'auth/network-request-failed': 'Network error. Please check your connection',
+            'auth/popup-blocked': 'Popup was blocked. Please allow popups for this site',
+            'auth/popup-closed-by-user': 'Sign in was cancelled',
+            'auth/cancelled-popup-request': 'Sign in process was cancelled',
+            'default': 'An error occurred. Please try again'
+        };
 
         // Check auth state on page load
         auth.onAuthStateChanged((user) => {
@@ -597,23 +503,11 @@
             } else {
                 showLogin();
             }
-            
-            // Add video hover effects
-            setupVideoHover();
         });
 
-        // Setup video hover effects
-        function setupVideoHover() {
-            const videos = document.querySelectorAll('video');
-            videos.forEach(video => {
-                video.addEventListener('mouseenter', () => {
-                    video.playbackRate = 1.2;
-                });
-                
-                video.addEventListener('mouseleave', () => {
-                    video.playbackRate = 1.0;
-                });
-            });
+        // Get custom error message
+        function getErrorMessage(errorCode) {
+            return errorMessages[errorCode] || errorMessages['default'];
         }
 
         // Show/Hide Loading
@@ -669,28 +563,25 @@
         function showLogin() {
             currentForm = 'login';
             mobileMenu.classList.add('hidden');
+            authTitle.textContent = 'Welcome Back';
+            authSubtitle.textContent = 'Sign in to continue streaming';
             
             authContent.innerHTML = `
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold">Welcome Back</h2>
-                    <p class="text-gray-400 mt-2">Sign in to continue streaming</p>
-                </div>
-                
                 <div id="loginError" class="hidden error-message p-3 rounded-lg mb-4">
                     <p class="text-sm"></p>
                 </div>
                 
-                <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-                    <div class="input-group">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="loginEmail" placeholder="Email address" 
-                               class="w-full input-with-icon form-input rounded-lg py-3 px-4 focus:outline-none" required>
+                <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email Address</label>
+                        <input type="email" id="loginEmail" placeholder="Enter your email" 
+                               class="w-full form-input rounded-lg py-3 px-4 focus:outline-none" required>
                     </div>
                     
                     <div class="input-group">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" 
-                               class="w-full input-with-icon form-input rounded-lg py-3 px-4 focus:outline-none" required>
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" 
+                               class="w-full form-input rounded-lg py-3 px-4 focus:outline-none pr-12" required>
                         <button type="button" onclick="togglePasswordVisibility('loginPassword')" class="toggle-password">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -701,14 +592,13 @@
                             <input type="checkbox" id="rememberMe" class="mr-2">
                             <label for="rememberMe" class="text-sm">Remember me</label>
                         </div>
-                        <button type="button" onclick="showForgotPassword()" class="text-sm text-green-400 hover:text-green-300">
+                        <button type="button" onclick="showForgotPassword()" class="text-sm text-green-400 hover:text-green-300 font-medium">
                             Forgot password?
                         </button>
                     </div>
                     
-                    <button type="submit" class="w-full gradient-bg py-3 rounded-lg font-semibold hover:opacity-90 transition flex items-center justify-center space-x-2">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Sign In</span>
+                    <button type="submit" class="w-full gradient-bg py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                        Sign In
                     </button>
                 </form>
                 
@@ -721,11 +611,11 @@
                     <span>Sign in with Google</span>
                 </button>
                 
-                <div class="text-center mt-6">
+                <div class="text-center mt-6 pt-4 border-t border-gray-800">
                     <p class="text-gray-400">
                         Don't have an account? 
                         <button onclick="showRegister()" class="text-green-400 hover:text-green-300 font-semibold">
-                            Start free trial
+                            Sign Up
                         </button>
                     </p>
                 </div>
@@ -736,34 +626,31 @@
         function showRegister() {
             currentForm = 'register';
             mobileMenu.classList.add('hidden');
+            authTitle.textContent = 'Join mtprime';
+            authSubtitle.textContent = 'Create your account to start streaming';
             
             authContent.innerHTML = `
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold">Create Account</h2>
-                    <p class="text-gray-400 mt-2">Start your free trial today</p>
-                </div>
-                
                 <div id="registerError" class="hidden error-message p-3 rounded-lg mb-4">
                     <p class="text-sm"></p>
                 </div>
                 
-                <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4">
-                    <div class="input-group">
-                        <i class="fas fa-user input-icon"></i>
-                        <input type="text" id="registerName" placeholder="Full name" 
-                               class="w-full input-with-icon form-input rounded-lg py-3 px-4 focus:outline-none" required>
+                <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Full Name</label>
+                        <input type="text" id="registerName" placeholder="Enter your full name" 
+                               class="w-full form-input rounded-lg py-3 px-4 focus:outline-none" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email Address</label>
+                        <input type="email" id="registerEmail" placeholder="Enter your email" 
+                               class="w-full form-input rounded-lg py-3 px-4 focus:outline-none" required>
                     </div>
                     
                     <div class="input-group">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="registerEmail" placeholder="Email address" 
-                               class="w-full input-with-icon form-input rounded-lg py-3 px-4 focus:outline-none" required>
-                    </div>
-                    
-                    <div class="input-group">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="registerPassword" placeholder="Password" 
-                               class="w-full input-with-icon form-input rounded-lg py-3 px-4 focus:outline-none" 
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <input type="password" id="registerPassword" placeholder="Create a password" 
+                               class="w-full form-input rounded-lg py-3 px-4 focus:outline-none pr-12" 
                                oninput="checkPasswordStrength(this.value)" required>
                         <button type="button" onclick="togglePasswordVisibility('registerPassword')" class="toggle-password">
                             <i class="fas fa-eye"></i>
@@ -779,24 +666,23 @@
                     </div>
                     
                     <div class="input-group">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="registerConfirmPassword" placeholder="Confirm password" 
-                               class="w-full input-with-icon form-input rounded-lg py-3 px-4 focus:outline-none" required>
+                        <label class="block text-sm font-medium mb-2">Confirm Password</label>
+                        <input type="password" id="registerConfirmPassword" placeholder="Confirm your password" 
+                               class="w-full form-input rounded-lg py-3 px-4 focus:outline-none pr-12" required>
                         <button type="button" onclick="togglePasswordVisibility('registerConfirmPassword')" class="toggle-password">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
                     
-                    <div class="flex items-center">
-                        <input type="checkbox" id="acceptTerms" class="mr-2" required>
+                    <div class="flex items-start space-x-2">
+                        <input type="checkbox" id="acceptTerms" class="mt-1" required>
                         <label for="acceptTerms" class="text-sm">
                             I agree to the <a href="#" class="text-green-400 hover:text-green-300">Terms of Service</a> and <a href="#" class="text-green-400 hover:text-green-300">Privacy Policy</a>
                         </label>
                     </div>
                     
-                    <button type="submit" class="w-full gradient-bg py-3 rounded-lg font-semibold hover:opacity-90 transition flex items-center justify-center space-x-2">
-                        <i class="fas fa-rocket"></i>
-                        <span>Start Free Trial</span>
+                    <button type="submit" class="w-full gradient-bg py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                        Create Account
                     </button>
                 </form>
                 
@@ -809,11 +695,11 @@
                     <span>Sign up with Google</span>
                 </button>
                 
-                <div class="text-center mt-6">
+                <div class="text-center mt-6 pt-4 border-t border-gray-800">
                     <p class="text-gray-400">
                         Already have an account? 
                         <button onclick="showLogin()" class="text-green-400 hover:text-green-300 font-semibold">
-                            Sign in
+                            Sign In
                         </button>
                     </p>
                 </div>
@@ -824,13 +710,10 @@
         function showForgotPassword() {
             currentForm = 'forgot';
             mobileMenu.classList.add('hidden');
+            authTitle.textContent = 'Reset Password';
+            authSubtitle.textContent = 'Enter your email to reset your password';
             
             authContent.innerHTML = `
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold">Reset Password</h2>
-                    <p class="text-gray-400 mt-2">Enter your email to reset your password</p>
-                </div>
-                
                 <div id="forgotError" class="hidden error-message p-3 rounded-lg mb-4">
                     <p class="text-sm"></p>
                 </div>
@@ -839,11 +722,11 @@
                     <p class="text-sm"></p>
                 </div>
                 
-                <form id="forgotForm" onsubmit="handleForgotPassword(event)" class="space-y-4">
-                    <div class="input-group">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="forgotEmail" placeholder="Email address" 
-                               class="w-full input-with-icon form-input rounded-lg py-3 px-4 focus:outline-none" required>
+                <form id="forgotForm" onsubmit="handleForgotPassword(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email Address</label>
+                        <input type="email" id="forgotEmail" placeholder="Enter your email" 
+                               class="w-full form-input rounded-lg py-3 px-4 focus:outline-none" required>
                     </div>
                     
                     <button type="submit" class="w-full gradient-bg py-3 rounded-lg font-semibold hover:opacity-90 transition">
@@ -851,7 +734,7 @@
                     </button>
                 </form>
                 
-                <div class="text-center mt-6">
+                <div class="text-center mt-6 pt-4 border-t border-gray-800">
                     <button onclick="showLogin()" class="text-green-400 hover:text-green-300 font-semibold">
                         ← Back to Sign In
                     </button>
@@ -862,8 +745,7 @@
         // Toggle Password Visibility
         function togglePasswordVisibility(fieldId) {
             const field = document.getElementById(fieldId);
-            const button = field.nextElementSibling;
-            const icon = button.querySelector('i');
+            const icon = field.nextElementSibling.querySelector('i');
             
             if (field.type === 'password') {
                 field.type = 'text';
@@ -931,7 +813,7 @@
             
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-            const rememberMe = document.getElementById('rememberMe').checked;
+            const rememberMe = document.getElementById('rememberMe')?.checked || false;
             const errorDiv = document.getElementById('loginError');
             const errorMessage = errorDiv.querySelector('p');
             
@@ -966,24 +848,8 @@
             } catch (error) {
                 hideLoading();
                 
-                // Handle specific errors
-                switch(error.code) {
-                    case 'auth/user-not-found':
-                        errorMessage.textContent = 'No account found with this email';
-                        break;
-                    case 'auth/wrong-password':
-                        errorMessage.textContent = 'Incorrect password';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage.textContent = 'Invalid email address';
-                        break;
-                    case 'auth/user-disabled':
-                        errorMessage.textContent = 'This account has been disabled';
-                        break;
-                    default:
-                        errorMessage.textContent = error.message || 'An error occurred';
-                }
-                
+                // Show custom error message
+                errorMessage.textContent = getErrorMessage(error.code);
                 errorDiv.classList.remove('hidden');
                 showToast(errorMessage.textContent, 'error');
             }
@@ -1034,9 +900,6 @@
                     displayName: name
                 });
                 
-                // Send email verification (optional)
-                // await user.sendEmailVerification();
-                
                 // Log analytics event
                 analytics.logEvent('sign_up', { method: 'email' });
                 
@@ -1047,24 +910,8 @@
             } catch (error) {
                 hideLoading();
                 
-                // Handle specific errors
-                switch(error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage.textContent = 'Email is already registered';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage.textContent = 'Invalid email address';
-                        break;
-                    case 'auth/operation-not-allowed':
-                        errorMessage.textContent = 'Email/password accounts are not enabled';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage.textContent = 'Password is too weak';
-                        break;
-                    default:
-                        errorMessage.textContent = error.message || 'An error occurred';
-                }
-                
+                // Show custom error message
+                errorMessage.textContent = getErrorMessage(error.code);
                 errorDiv.classList.remove('hidden');
                 showToast(errorMessage.textContent, 'error');
             }
@@ -1111,18 +958,8 @@
             } catch (error) {
                 hideLoading();
                 
-                // Handle specific errors
-                switch(error.code) {
-                    case 'auth/user-not-found':
-                        errorMessage.textContent = 'No account found with this email';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage.textContent = 'Invalid email address';
-                        break;
-                    default:
-                        errorMessage.textContent = error.message || 'An error occurred';
-                }
-                
+                // Show custom error message
+                errorMessage.textContent = getErrorMessage(error.code);
                 errorDiv.classList.remove('hidden');
                 showToast(errorMessage.textContent, 'error');
             }
@@ -1151,20 +988,8 @@
             } catch (error) {
                 hideLoading();
                 
-                // Handle specific errors
-                switch(error.code) {
-                    case 'auth/popup-blocked':
-                        showToast('Popup was blocked by the browser. Please allow popups for this site.', 'error');
-                        break;
-                    case 'auth/popup-closed-by-user':
-                        showToast('Sign in was cancelled.', 'error');
-                        break;
-                    case 'auth/cancelled-popup-request':
-                        // Multiple popups opened, ignore
-                        break;
-                    default:
-                        showToast(error.message || 'An error occurred during Google sign in', 'error');
-                }
+                // Show custom error message
+                showToast(getErrorMessage(error.code), 'error');
             }
         }
 
