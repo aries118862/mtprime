@@ -434,139 +434,158 @@
     </div>
 
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB_yOh7N1zVsGNhUQQwCyUUvjIgVdge_LQ",
-            authDomain: "mtprime-51d91.firebaseapp.com",
-            projectId: "mtprime-51d91",
-            storageBucket: "mtprime-51d91.firebasestorage.app",
-            messagingSenderId: "987560990642",
-            appId: "1:987560990642:web:2bdda54b810d87a94f36ab",
-            measurementId: "G-GMCQVW1Q44"
-        };
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_yOh7N1zVsGNhUQQwCyUUvjIgVdge_LQ",
+        authDomain: "mtprime-51d91.firebaseapp.com",
+        projectId: "mtprime-51d91",
+        storageBucket: "mtprime-51d91.firebasestorage.app",
+        messagingSenderId: "987560990642",
+        appId: "1:987560990642:web:2bdda54b810d87a94f36ab",
+        measurementId: "G-GMCQVW1Q44"
+    };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const analytics = firebase.analytics();
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const analytics = firebase.analytics();
 
-        // DOM Elements
-        const authCard = document.getElementById('authCard');
-        const authContent = document.getElementById('authContent');
-        const authTitle = document.getElementById('authTitle');
-        const authSubtitle = document.getElementById('authSubtitle');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const messageToast = document.getElementById('messageToast');
-        const toastIcon = document.getElementById('toastIcon');
-        const toastMessage = document.getElementById('toastMessage');
-        const mobileMenu = document.getElementById('mobileMenu');
+    // DOM Elements
+    const authCard = document.getElementById('authCard');
+    const authContent = document.getElementById('authContent');
+    const authTitle = document.getElementById('authTitle');
+    const authSubtitle = document.getElementById('authSubtitle');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const messageToast = document.getElementById('messageToast');
+    const toastIcon = document.getElementById('toastIcon');
+    const toastMessage = document.getElementById('toastMessage');
+    const mobileMenu = document.getElementById('mobileMenu');
 
-        // Auth State
-        let currentForm = 'login';
-        let passwordVisible = false;
-        let confirmPasswordVisible = false;
+    // Auth State
+    let currentForm = 'login';
+    let passwordVisible = false;
+    let confirmPasswordVisible = false;
 
-        // Custom Firebase Error Messages
-        const errorMessages = {
-            'auth/invalid-email': 'Please enter a valid email address',
-            'auth/user-disabled': 'This account has been disabled',
-            'auth/user-not-found': 'No account found with this email',
-            'auth/wrong-password': 'Incorrect password. Please try again',
-            'auth/email-already-in-use': 'This email is already registered. Please sign in instead',
-            'auth/weak-password': 'Password is too weak. Use at least 6 characters',
-            'auth/operation-not-allowed': 'Email/password accounts are not enabled',
-            'auth/too-many-requests': 'Too many attempts. Please try again later',
-            'auth/network-request-failed': 'Network error. Please check your connection',
-            'auth/popup-blocked': 'Popup was blocked. Please allow popups for this site',
-            'auth/popup-closed-by-user': 'Sign in was cancelled',
-            'auth/cancelled-popup-request': 'Sign in process was cancelled',
-            'default': 'An error occurred. Please try again'
-        };
+    // Custom Firebase Error Messages
+    const errorMessages = {
+        'auth/invalid-email': 'Please enter a valid email address',
+        'auth/user-disabled': 'This account has been disabled',
+        'auth/user-not-found': 'No account found with this email',
+        'auth/wrong-password': 'Incorrect password. Please try again',
+        'auth/email-already-in-use': 'This email is already registered. Please sign in instead',
+        'auth/weak-password': 'Password is too weak. Use at least 6 characters',
+        'auth/operation-not-allowed': 'Email/password accounts are not enabled',
+        'auth/too-many-requests': 'Too many attempts. Please try again later',
+        'auth/network-request-failed': 'Network error. Please check your connection',
+        'auth/popup-blocked': 'Popup was blocked. Please allow popups for this site',
+        'auth/popup-closed-by-user': 'Sign in was cancelled',
+        'auth/cancelled-popup-request': 'Sign in process was cancelled',
+        'default': 'An error occurred. Please try again'
+    };
 
-        // Check auth state on page load
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // User is signed in, redirect to main page
-                redirectToMainPage();
-            } else {
-                // User is signed out, show login form
-                showLogin();
-            }
-        });
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check if user is already logged in
-            const user = auth.currentUser;
-            if (user) {
-                redirectToMainPage();
-            } else {
-                showLogin();
-            }
-        });
-
-        // Get custom error message
-        function getErrorMessage(errorCode) {
-            return errorMessages[errorCode] || errorMessages['default'];
-        }
-
-        // Show/Hide Loading
-        function showLoading() {
-            loadingOverlay.classList.remove('hidden');
-            loadingOverlay.classList.add('flex');
-        }
-
-        function hideLoading() {
-            loadingOverlay.classList.add('hidden');
-            loadingOverlay.classList.remove('flex');
-        }
-
-        // Show Message Toast
-        function showToast(message, type = 'info') {
-            toastMessage.textContent = message;
+    // Check auth state on page load
+    auth.onAuthStateChanged((user) => {
+        console.log("Auth state changed, user:", user);
+        
+        if (user) {
+            // User is signed in, store user data in localStorage
+            const userData = {
+                name: user.displayName || user.email.split('@')[0],
+                email: user.email,
+                plan: 'Trial',
+                trialDays: 7,
+                uid: user.uid
+            };
             
-            switch(type) {
-                case 'success':
-                    messageToast.className = 'fixed top-4 right-4 z-50 success-message p-4 rounded-lg shadow-xl max-w-sm';
-                    toastIcon.className = 'fas fa-check-circle text-green-400 text-lg';
-                    break;
-                case 'error':
-                    messageToast.className = 'fixed top-4 right-4 z-50 error-message p-4 rounded-lg shadow-xl max-w-sm';
-                    toastIcon.className = 'fas fa-exclamation-circle text-red-400 text-lg';
-                    break;
-                default:
-                    messageToast.className = 'fixed top-4 right-4 z-50 bg-gray-800 p-4 rounded-lg shadow-xl max-w-sm';
-                    toastIcon.className = 'fas fa-info-circle text-blue-400 text-lg';
-            }
+            // Store in localStorage for the main page
+            localStorage.setItem('mtprime_user', JSON.stringify(userData));
+            localStorage.setItem('mtprime_logged_in', 'true');
             
-            messageToast.classList.remove('hidden');
+            console.log("User data stored in localStorage:", userData);
             
-            // Auto hide after 5 seconds
-            setTimeout(hideToast, 5000);
+            // Redirect to main page
+            redirectToMainPage();
+        } else {
+            // User is signed out, clear localStorage and show login form
+            localStorage.removeItem('mtprime_user');
+            localStorage.removeItem('mtprime_logged_in');
+            showLogin();
         }
+    });
 
-        function hideToast() {
-            messageToast.classList.add('hidden');
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        // Check if user is already logged in via Firebase
+        // The auth state listener will handle the redirect if user is found
+    });
+
+    // Get custom error message
+    function getErrorMessage(errorCode) {
+        return errorMessages[errorCode] || errorMessages['default'];
+    }
+
+    // Show/Hide Loading
+    function showLoading() {
+        loadingOverlay.classList.remove('hidden');
+        loadingOverlay.classList.add('flex');
+    }
+
+    function hideLoading() {
+        loadingOverlay.classList.add('hidden');
+        loadingOverlay.classList.remove('flex');
+    }
+
+    // Show Message Toast
+    function showToast(message, type = 'info') {
+        toastMessage.textContent = message;
+        
+        switch(type) {
+            case 'success':
+                messageToast.className = 'fixed top-4 right-4 z-50 success-message p-4 rounded-lg shadow-xl max-w-sm';
+                toastIcon.className = 'fas fa-check-circle text-green-400 text-lg';
+                break;
+            case 'error':
+                messageToast.className = 'fixed top-4 right-4 z-50 error-message p-4 rounded-lg shadow-xl max-w-sm';
+                toastIcon.className = 'fas fa-exclamation-circle text-red-400 text-lg';
+                break;
+            default:
+                messageToast.className = 'fixed top-4 right-4 z-50 bg-gray-800 p-4 rounded-lg shadow-xl max-w-sm';
+                toastIcon.className = 'fas fa-info-circle text-blue-400 text-lg';
         }
+        
+        messageToast.classList.remove('hidden');
+        
+        // Auto hide after 5 seconds
+        setTimeout(hideToast, 5000);
+    }
 
-        // Toggle Mobile Menu
-        function toggleMobileMenu() {
-            mobileMenu.classList.toggle('hidden');
-        }
+    function hideToast() {
+        messageToast.classList.add('hidden');
+    }
 
-        // Redirect to Main Page
-        function redirectToMainPage() {
-            window.location.href = 'main.html'; // Change to your main page filename
-        }
+    // Toggle Mobile Menu
+    function toggleMobileMenu() {
+        mobileMenu.classList.toggle('hidden');
+    }
 
-        // Show Login Form
-        function showLogin() {
-            currentForm = 'login';
-            mobileMenu.classList.add('hidden');
-            authTitle.textContent = 'Welcome Back';
-            authSubtitle.textContent = 'Sign in to continue streaming';
-            
-            authContent.innerHTML = `
+    // Redirect to Main Page
+    function redirectToMainPage() {
+        console.log("Redirecting to main page...");
+        
+        // Add a small delay to ensure localStorage is saved
+        setTimeout(() => {
+            window.location.href = 'main.html';
+        }, 500);
+    }
+
+    // Show Login Form
+    function showLogin() {
+        currentForm = 'login';
+        mobileMenu.classList.add('hidden');
+        authTitle.textContent = 'Welcome Back';
+        authSubtitle.textContent = 'Sign in to continue streaming';
+        
+        authContent.innerHTML = `
                 <div id="loginError" class="hidden error-message p-3 rounded-lg mb-4">
                     <p class="text-sm"></p>
                 </div>
@@ -620,16 +639,16 @@
                     </p>
                 </div>
             `;
-        }
+    }
 
-        // Show Register Form
-        function showRegister() {
-            currentForm = 'register';
-            mobileMenu.classList.add('hidden');
-            authTitle.textContent = 'Join mtprime';
-            authSubtitle.textContent = 'Create your account to start streaming';
-            
-            authContent.innerHTML = `
+    // Show Register Form
+    function showRegister() {
+        currentForm = 'register';
+        mobileMenu.classList.add('hidden');
+        authTitle.textContent = 'Join mtprime';
+        authSubtitle.textContent = 'Create your account to start streaming';
+        
+        authContent.innerHTML = `
                 <div id="registerError" class="hidden error-message p-3 rounded-lg mb-4">
                     <p class="text-sm"></p>
                 </div>
@@ -704,16 +723,16 @@
                     </p>
                 </div>
             `;
-        }
+    }
 
-        // Show Forgot Password Form
-        function showForgotPassword() {
-            currentForm = 'forgot';
-            mobileMenu.classList.add('hidden');
-            authTitle.textContent = 'Reset Password';
-            authSubtitle.textContent = 'Enter your email to reset your password';
-            
-            authContent.innerHTML = `
+    // Show Forgot Password Form
+    function showForgotPassword() {
+        currentForm = 'forgot';
+        mobileMenu.classList.add('hidden');
+        authTitle.textContent = 'Reset Password';
+        authSubtitle.textContent = 'Enter your email to reset your password';
+        
+        authContent.innerHTML = `
                 <div id="forgotError" class="hidden error-message p-3 rounded-lg mb-4">
                     <p class="text-sm"></p>
                 </div>
@@ -740,275 +759,276 @@
                     </button>
                 </div>
             `;
-        }
+    }
 
-        // Toggle Password Visibility
-        function togglePasswordVisibility(fieldId) {
-            const field = document.getElementById(fieldId);
-            const icon = field.nextElementSibling.querySelector('i');
-            
-            if (field.type === 'password') {
-                field.type = 'text';
-                icon.className = 'fas fa-eye-slash';
-            } else {
-                field.type = 'password';
-                icon.className = 'fas fa-eye';
-            }
+    // Toggle Password Visibility
+    function togglePasswordVisibility(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = field.nextElementSibling.querySelector('i');
+        
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            field.type = 'password';
+            icon.className = 'fas fa-eye';
         }
+    }
 
-        // Check Password Strength
-        function checkPasswordStrength(password) {
-            const strengthDiv = document.getElementById('passwordStrength');
-            const strengthBar = document.getElementById('strengthBar');
-            const strengthText = document.getElementById('strengthText');
-            
-            if (!password) {
-                strengthDiv.classList.add('hidden');
-                return;
-            }
-            
-            strengthDiv.classList.remove('hidden');
-            
-            let strength = 0;
-            
-            // Length check
-            if (password.length >= 8) strength++;
-            if (password.length >= 12) strength++;
-            
-            // Complexity checks
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-            
-            // Cap strength at 4
-            strength = Math.min(strength, 4);
-            
-            // Update UI
-            strengthBar.className = `password-strength strength-${strength}`;
-            
-            switch(strength) {
-                case 0:
-                case 1:
-                    strengthText.textContent = 'Weak';
-                    strengthText.className = 'text-red-400';
-                    break;
-                case 2:
-                    strengthText.textContent = 'Fair';
-                    strengthText.className = 'text-yellow-400';
-                    break;
-                case 3:
-                    strengthText.textContent = 'Good';
-                    strengthText.className = 'text-blue-400';
-                    break;
-                case 4:
-                    strengthText.textContent = 'Strong';
-                    strengthText.className = 'text-green-400';
-                    break;
-            }
+    // Check Password Strength
+    function checkPasswordStrength(password) {
+        const strengthDiv = document.getElementById('passwordStrength');
+        const strengthBar = document.getElementById('strengthBar');
+        const strengthText = document.getElementById('strengthText');
+        
+        if (!password) {
+            strengthDiv.classList.add('hidden');
+            return;
         }
-
-        // Handle Login
-        async function handleLogin(event) {
-            event.preventDefault();
-            
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const rememberMe = document.getElementById('rememberMe')?.checked || false;
-            const errorDiv = document.getElementById('loginError');
-            const errorMessage = errorDiv.querySelector('p');
-            
-            // Clear previous errors
-            errorDiv.classList.add('hidden');
-            
-            // Validation
-            if (!email || !password) {
-                errorMessage.textContent = 'Please fill in all fields';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-            
-            showLoading();
-            
-            try {
-                // Set persistence
-                const persistence = rememberMe ? 
-                    firebase.auth.Auth.Persistence.LOCAL : 
-                    firebase.auth.Auth.Persistence.SESSION;
-                
-                await auth.setPersistence(persistence);
-                
-                // Sign in with email and password
-                await auth.signInWithEmailAndPassword(email, password);
-                
-                // Log analytics event
-                analytics.logEvent('login', { method: 'email' });
-                
-                // Redirect will happen in auth state listener
-                
-            } catch (error) {
-                hideLoading();
-                
-                // Show custom error message
-                errorMessage.textContent = getErrorMessage(error.code);
-                errorDiv.classList.remove('hidden');
-                showToast(errorMessage.textContent, 'error');
-            }
+        
+        strengthDiv.classList.remove('hidden');
+        
+        let strength = 0;
+        
+        // Length check
+        if (password.length >= 8) strength++;
+        if (password.length >= 12) strength++;
+        
+        // Complexity checks
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        
+        // Cap strength at 4
+        strength = Math.min(strength, 4);
+        
+        // Update UI
+        strengthBar.className = `password-strength strength-${strength}`;
+        
+        switch(strength) {
+            case 0:
+            case 1:
+                strengthText.textContent = 'Weak';
+                strengthText.className = 'text-red-400';
+                break;
+            case 2:
+                strengthText.textContent = 'Fair';
+                strengthText.className = 'text-yellow-400';
+                break;
+            case 3:
+                strengthText.textContent = 'Good';
+                strengthText.className = 'text-blue-400';
+                break;
+            case 4:
+                strengthText.textContent = 'Strong';
+                strengthText.className = 'text-green-400';
+                break;
         }
+    }
 
-        // Handle Registration
-        async function handleRegister(event) {
-            event.preventDefault();
-            
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('registerConfirmPassword').value;
-            const errorDiv = document.getElementById('registerError');
-            const errorMessage = errorDiv.querySelector('p');
-            
-            // Clear previous errors
-            errorDiv.classList.add('hidden');
-            
-            // Validation
-            if (!name || !email || !password || !confirmPassword) {
-                errorMessage.textContent = 'Please fill in all fields';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                errorMessage.textContent = 'Passwords do not match';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-            
-            if (password.length < 6) {
-                errorMessage.textContent = 'Password must be at least 6 characters';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-            
-            showLoading();
-            
-            try {
-                // Create user with email and password
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                // Update profile with name
-                await user.updateProfile({
-                    displayName: name
-                });
-                
-                // Log analytics event
-                analytics.logEvent('sign_up', { method: 'email' });
-                
-                showToast('Account created successfully! Welcome to mtprime!', 'success');
-                
-                // Redirect will happen in auth state listener
-                
-            } catch (error) {
-                hideLoading();
-                
-                // Show custom error message
-                errorMessage.textContent = getErrorMessage(error.code);
-                errorDiv.classList.remove('hidden');
-                showToast(errorMessage.textContent, 'error');
-            }
+    // Handle Login
+    async function handleLogin(event) {
+        event.preventDefault();
+        
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const rememberMe = document.getElementById('rememberMe')?.checked || false;
+        const errorDiv = document.getElementById('loginError');
+        const errorMessage = errorDiv.querySelector('p');
+        
+        // Clear previous errors
+        errorDiv.classList.add('hidden');
+        
+        // Validation
+        if (!email || !password) {
+            errorMessage.textContent = 'Please fill in all fields';
+            errorDiv.classList.remove('hidden');
+            return;
         }
-
-        // Handle Forgot Password
-        async function handleForgotPassword(event) {
-            event.preventDefault();
+        
+        showLoading();
+        
+        try {
+            // Set persistence
+            const persistence = rememberMe ? 
+                firebase.auth.Auth.Persistence.LOCAL : 
+                firebase.auth.Auth.Persistence.SESSION;
             
-            const email = document.getElementById('forgotEmail').value;
-            const errorDiv = document.getElementById('forgotError');
-            const successDiv = document.getElementById('forgotSuccess');
-            const errorMessage = errorDiv.querySelector('p');
-            const successMessage = successDiv.querySelector('p');
+            await auth.setPersistence(persistence);
             
-            // Clear previous messages
-            errorDiv.classList.add('hidden');
-            successDiv.classList.add('hidden');
+            // Sign in with email and password
+            await auth.signInWithEmailAndPassword(email, password);
             
-            // Validation
-            if (!email) {
-                errorMessage.textContent = 'Please enter your email address';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
+            // Log analytics event
+            analytics.logEvent('login', { method: 'email' });
             
-            showLoading();
+            // Show success message
+            showToast('Login successful! Redirecting...', 'success');
             
-            try {
-                // Send password reset email
-                await auth.sendPasswordResetEmail(email);
-                
-                hideLoading();
-                
-                // Show success message
-                successMessage.textContent = 'Password reset email sent! Check your inbox.';
-                successDiv.classList.remove('hidden');
-                
-                // Clear form
-                document.getElementById('forgotEmail').value = '';
-                
-                showToast('Password reset email sent successfully!', 'success');
-                
-            } catch (error) {
-                hideLoading();
-                
-                // Show custom error message
-                errorMessage.textContent = getErrorMessage(error.code);
-                errorDiv.classList.remove('hidden');
-                showToast(errorMessage.textContent, 'error');
-            }
+            // The auth state listener will handle the redirect and localStorage setting
+            
+        } catch (error) {
+            hideLoading();
+            
+            // Show custom error message
+            errorMessage.textContent = getErrorMessage(error.code);
+            errorDiv.classList.remove('hidden');
+            showToast(errorMessage.textContent, 'error');
         }
+    }
 
-        // Sign in with Google
-        async function signInWithGoogle() {
-            showLoading();
+    // Handle Registration
+    async function handleRegister(event) {
+        event.preventDefault();
+        
+        const name = document.getElementById('registerName').value;
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('registerConfirmPassword').value;
+        const errorDiv = document.getElementById('registerError');
+        const errorMessage = errorDiv.querySelector('p');
+        
+        // Clear previous errors
+        errorDiv.classList.add('hidden');
+        
+        // Validation
+        if (!name || !email || !password || !confirmPassword) {
+            errorMessage.textContent = 'Please fill in all fields';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            errorMessage.textContent = 'Passwords do not match';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        
+        if (password.length < 6) {
+            errorMessage.textContent = 'Password must be at least 6 characters';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        
+        showLoading();
+        
+        try {
+            // Create user with email and password
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            const user = userCredential.user;
             
-            try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                provider.addScope('profile');
-                provider.addScope('email');
-                
-                // Sign in with popup
-                const result = await auth.signInWithPopup(provider);
-                const user = result.user;
-                
-                // Log analytics event
-                analytics.logEvent('login', { method: 'google' });
-                
-                showToast(`Welcome ${user.displayName}!`, 'success');
-                
-                // Redirect will happen in auth state listener
-                
-            } catch (error) {
-                hideLoading();
-                
-                // Show custom error message
-                showToast(getErrorMessage(error.code), 'error');
-            }
+            // Update profile with name
+            await user.updateProfile({
+                displayName: name
+            });
+            
+            // Log analytics event
+            analytics.logEvent('sign_up', { method: 'email' });
+            
+            showToast('Account created successfully! Welcome to mtprime!', 'success');
+            
+            // The auth state listener will handle the redirect and localStorage setting
+            
+        } catch (error) {
+            hideLoading();
+            
+            // Show custom error message
+            errorMessage.textContent = getErrorMessage(error.code);
+            errorDiv.classList.remove('hidden');
+            showToast(errorMessage.textContent, 'error');
         }
+    }
 
-        // Sign out (for future use)
-        async function signOut() {
-            try {
-                await auth.signOut();
-                showToast('Signed out successfully', 'success');
-            } catch (error) {
-                showToast('Error signing out', 'error');
-            }
+    // Handle Forgot Password
+    async function handleForgotPassword(event) {
+        event.preventDefault();
+        
+        const email = document.getElementById('forgotEmail').value;
+        const errorDiv = document.getElementById('forgotError');
+        const successDiv = document.getElementById('forgotSuccess');
+        const errorMessage = errorDiv.querySelector('p');
+        const successMessage = successDiv.querySelector('p');
+        
+        // Clear previous messages
+        errorDiv.classList.add('hidden');
+        successDiv.classList.add('hidden');
+        
+        // Validation
+        if (!email) {
+            errorMessage.textContent = 'Please enter your email address';
+            errorDiv.classList.remove('hidden');
+            return;
         }
+        
+        showLoading();
+        
+        try {
+            // Send password reset email
+            await auth.sendPasswordResetEmail(email);
+            
+            hideLoading();
+            
+            // Show success message
+            successMessage.textContent = 'Password reset email sent! Check your inbox.';
+            successDiv.classList.remove('hidden');
+            
+            // Clear form
+            document.getElementById('forgotEmail').value = '';
+            
+            showToast('Password reset email sent successfully!', 'success');
+            
+        } catch (error) {
+            hideLoading();
+            
+            // Show custom error message
+            errorMessage.textContent = getErrorMessage(error.code);
+            errorDiv.classList.remove('hidden');
+            showToast(errorMessage.textContent, 'error');
+        }
+    }
 
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', (event) => {
-            if (!event.target.closest('#mobileMenu') && !event.target.closest('button[onclick="toggleMobileMenu()"]')) {
-                mobileMenu.classList.add('hidden');
-            }
-        });
-    </script>
+    // Sign in with Google
+    async function signInWithGoogle() {
+        showLoading();
+        
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope('profile');
+            provider.addScope('email');
+            
+            // Sign in with popup
+            await auth.signInWithPopup(provider);
+            
+            // Log analytics event
+            analytics.logEvent('login', { method: 'google' });
+            
+            // The auth state listener will handle the redirect and localStorage setting
+            
+        } catch (error) {
+            hideLoading();
+            
+            // Show custom error message
+            showToast(getErrorMessage(error.code), 'error');
+        }
+    }
+
+    // Sign out (for future use)
+    async function signOut() {
+        try {
+            await auth.signOut();
+            showToast('Signed out successfully', 'success');
+        } catch (error) {
+            showToast('Error signing out', 'error');
+        }
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (event) => {
+        if (!event.target.closest('#mobileMenu') && !event.target.closest('button[onclick="toggleMobileMenu()"]')) {
+            mobileMenu.classList.add('hidden');
+        }
+    });
+</script>
+    
 </body>
-</html>
+</html> 

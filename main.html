@@ -78,6 +78,7 @@
             max-width: 800px;
             margin: 2rem auto;
             animation: modalFade 0.3s ease;
+            width: 95%;
         }
         
         @keyframes modalFade {
@@ -139,6 +140,22 @@
             opacity: 1;
         }
         
+        .video-thumbnail:hover .card-video {
+            opacity: 1;
+        }
+        
+        .card-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+        
         .play-overlay {
             position: absolute;
             top: 0;
@@ -151,15 +168,267 @@
             justify-content: center;
             opacity: 0;
             transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+        
+        /* Trial Badge */
+        .trial-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        /* Mobile Responsive Improvements */
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+                max-width: 100%;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .hero-buttons button {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .content-card {
+                min-width: 180px;
+                max-width: 180px;
+            }
+            
+            .video-thumbnail video {
+                height: 100px;
+            }
+            
+            .section-title {
+                font-size: 1.25rem;
+            }
+            
+            .mobile-hidden {
+                display: none !important;
+            }
+            
+            .mobile-menu-button {
+                display: block !important;
+            }
+            
+            .desktop-nav {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .content-card {
+                min-width: 150px;
+                max-width: 150px;
+            }
+            
+            .hero-buttons button {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+            
+            .logo-font {
+                font-size: 1.25rem;
+            }
+            
+            .profile-dropdown {
+                right: 0;
+                width: 200px;
+            }
+        }
+        
+        /* Mobile Menu Styles */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+        
+        .mobile-menu-backdrop {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        
+        .mobile-menu-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* View All Modal Styles */
+        .view-all-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .view-all-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+        }
+        
+        /* Video card styles */
+        .card-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+        
+        .card-content {
+            position: relative;
+            z-index: 3;
+        }
+        
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 0;
         }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
+    <!-- View All Modal -->
+    <div id="viewAllModal" class="modal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h3 id="viewAllTitle" class="text-xl font-bold">All Movies</h3>
+                <button onclick="closeViewAll()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <!-- Filter Section -->
+                <div class="mb-6">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button class="px-4 py-2 bg-gray-800 rounded-full hover:bg-gray-700 transition active-filter">All</button>
+                        <button class="px-4 py-2 bg-gray-800 rounded-full hover:bg-gray-700 transition">Action</button>
+                        <button class="px-4 py-2 bg-gray-800 rounded-full hover:bg-gray-700 transition">Drama</button>
+                        <button class="px-4 py-2 bg-gray-800 rounded-full hover:bg-gray-700 transition">Comedy</button>
+                        <button class="px-4 py-2 bg-gray-800 rounded-full hover:bg-gray-700 transition">2023</button>
+                        <button class="px-4 py-2 bg-gray-800 rounded-full hover:bg-gray-700 transition">HD</button>
+                    </div>
+                    
+                    <div class="relative">
+                        <input type="text" id="viewAllSearch" placeholder="Search in category..." 
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:border-green-500"
+                               oninput="searchInViewAll()">
+                        <i class="fas fa-search absolute right-4 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Content Grid -->
+                <div id="viewAllContent" class="view-all-grid">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+                
+                <!-- Load More -->
+                <div class="text-center mt-8">
+                    <button onclick="loadMoreContent()" 
+                            class="px-6 py-3 gradient-bg rounded-lg font-semibold hover:opacity-90 transition">
+                        Load More
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenuBackdrop" class="mobile-menu-backdrop fixed inset-0 bg-black/80 z-50"></div>
+    <div id="mobileMenu" class="mobile-menu fixed top-0 right-0 h-full w-64 bg-gray-900 z-50 shadow-xl">
+        <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+            <div class="logo-font text-xl">
+                <span class="text-white">mt</span><span class="text-green-500">prime</span>
+            </div>
+            <button onclick="toggleMobileMenu()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="p-4">
+            <!-- User Info -->
+            <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+                <div class="flex items-center space-x-3 mb-2">
+                    <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+                        <span id="mobileProfileInitial" class="font-semibold"></span>
+                    </div>
+                    <div>
+                        <p id="mobileUserName" class="font-semibold"></p>
+                        <p id="mobileUserEmail" class="text-sm text-gray-400"></p>
+                    </div>
+                </div>
+                <div id="mobileTrialStatus" class="text-sm text-yellow-400"></div>
+            </div>
+            
+            <!-- Navigation -->
+            <div class="space-y-2">
+                <a href="home.html" class="block px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-home mr-3"></i>Home
+                </a>
+                <a href="#movies" onclick="showViewAll('movies')" class="block px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-film mr-3"></i>Movies
+                </a>
+                <a href="#series" onclick="showViewAll('series')" class="block px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-tv mr-3"></i>Series
+                </a>
+                <a href="#mylist" onclick="showViewAll('mylist')" class="block px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-heart mr-3"></i>My List
+                </a>
+                <a href="#downloads" onclick="toggleDownloadManager()" class="block px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-download mr-3"></i>Downloads
+                </a>
+                <a href="#settings" class="block px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-cog mr-3"></i>Settings
+                </a>
+                
+                <hr class="border-gray-800 my-4">
+                
+                <!-- Upgrade Button -->
+                <button onclick="manageSubscription()" 
+                        class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 transition gradient-text font-semibold">
+                    <i class="fas fa-crown mr-3"></i>Upgrade Plan
+                </button>
+                
+                <!-- Logout Button -->
+                <button onclick="logout()" 
+                        class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 transition text-red-400">
+                    <i class="fas fa-sign-out-alt mr-3"></i>Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Navigation -->
-    <nav class="bg-gray-900/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-800">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <!-- Logo - Replaced triangle with logo.png -->
-            <div class="flex items-center space-x-2">
+    <nav class="bg-gray-900/90 backdrop-blur-md sticky top-0 z-40 border-b border-gray-800">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between nav-container">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2 logo-container">
                 <div class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
                     <img src="logo.png" alt="mtprime logo" class="w-full h-full object-contain">
                 </div>
@@ -169,44 +438,95 @@
             </div>
             
             <!-- Desktop Navigation -->
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="#" class="text-white hover:text-green-400 transition"><i class="fas fa-home mr-2"></i>Home</a>
-                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fas fa-film mr-2"></i>Movies</a>
-                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fas fa-tv mr-2"></i>Series</a>
-                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fas fa-heart mr-2"></i>My List</a>
+            <div class="desktop-nav md:flex items-center space-x-8">
+                <a href="home.html" class="text-white hover:text-green-400 transition"><i class="fas fa-home mr-2"></i>Home</a>
+                <a href="#movies" onclick="showViewAll('movies')" class="text-gray-400 hover:text-white transition"><i class="fas fa-film mr-2"></i>Movies</a>
+                <a href="#series" onclick="showViewAll('series')" class="text-gray-400 hover:text-white transition"><i class="fas fa-tv mr-2"></i>Series</a>
+                <a href="#mylist" onclick="showViewAll('mylist')" class="text-gray-400 hover:text-white transition"><i class="fas fa-heart mr-2"></i>My List</a>
             </div>
             
-            <!-- Right Section -->
+            <!-- Right Section with Mobile Menu Button -->
             <div class="flex items-center space-x-4">
                 <!-- Search -->
-                <button onclick="toggleSearch()" class="text-gray-400 hover:text-white transition">
+                <button onclick="toggleSearch()" class="text-gray-400 hover:text-white transition mobile-hidden">
                     <i class="fas fa-search"></i>
                 </button>
                 
                 <!-- Notifications -->
-                <div class="relative">
+                <div class="relative mobile-hidden">
                     <button onclick="toggleNotifications()" class="text-gray-400 hover:text-white transition">
                         <i class="fas fa-bell"></i>
                     </button>
                     <div class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center">3</div>
                 </div>
                 
-                <!-- Profile -->
-                <div class="relative group">
+                <!-- Mobile Menu Button (Moved to right) -->
+                <button onclick="toggleMobileMenu()" class="md:hidden text-gray-400 hover:text-white mobile-menu-button">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+                
+                <!-- User Profile (Desktop) -->
+                <div class="relative group hidden md:block" id="profileSection">
                     <button onclick="toggleProfileMenu()" class="flex items-center space-x-2">
-                        <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center">
-                            <span class="font-semibold">J</span>
+                        <!-- Trial Badge (if trial user) -->
+                        <div id="trialBadgeNav" class="hidden">
+                            <span class="trial-badge">
+                                <i class="fas fa-crown"></i>
+                                Trial
+                            </span>
                         </div>
-                        <i class="fas fa-chevron-down text-gray-400"></i>
+                        
+                        <!-- User Info -->
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center">
+                                <span id="profileInitial" class="font-semibold"></span>
+                            </div>
+                            <span id="userName" class="text-sm font-medium"></span>
+                            <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+                        </div>
                     </button>
                     
                     <!-- Profile Dropdown -->
-                    <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl py-2">
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-700"><i class="fas fa-user mr-2"></i>Manage Profiles</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-700"><i class="fas fa-cog mr-2"></i>Account Settings</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-700"><i class="fas fa-download mr-2"></i>Downloads</a>
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-xl py-2 z-50">
+                        <!-- User Info -->
+                        <div class="px-4 py-3 border-b border-gray-700">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p id="dropdownUserName" class="font-semibold"></p>
+                                    <p id="dropdownUserEmail" class="text-sm text-gray-400 truncate"></p>
+                                </div>
+                                <div id="trialBadgeDropdown" class="hidden">
+                                    <span class="trial-badge text-xs">Trial</span>
+                                </div>
+                            </div>
+                            <!-- Trial Status Message -->
+                            <div id="trialStatusMessage" class="mt-2 text-sm text-yellow-400 hidden"></div>
+                        </div>
+                        
+                        <!-- Menu Items -->
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-700 transition">
+                            <i class="fas fa-user mr-2"></i>Manage Profile
+                        </a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-700 transition">
+                            <i class="fas fa-cog mr-2"></i>Settings
+                        </a>
+                        <a href="#" onclick="toggleDownloadManager()" class="block px-4 py-2 hover:bg-gray-700 transition">
+                            <i class="fas fa-download mr-2"></i>Downloads
+                        </a>
+                        
+                        <!-- Upgrade Button -->
+                        <button onclick="manageSubscription()" 
+                                class="w-full text-left px-4 py-2 hover:bg-gray-700 transition gradient-text font-semibold">
+                            <i class="fas fa-crown mr-2"></i>Upgrade Plan
+                        </button>
+                        
                         <hr class="border-gray-700 my-2">
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-700 text-red-400"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a>
+                        
+                        <!-- Logout Button -->
+                        <button onclick="logout()" 
+                                class="w-full text-left px-4 py-2 hover:bg-gray-700 transition text-red-400">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
+                        </button>
                     </div>
                 </div>
             </div>
@@ -255,7 +575,7 @@
     <!-- Main Content -->
     <main>
         <!-- Hero Banner with Video -->
-        <section class="relative h-[70vh] overflow-hidden">
+        <section class="relative h-[50vh] md:h-[70vh] overflow-hidden">
             <div class="absolute inset-0">
                 <!-- Embed real video -->
                 <video autoplay muted loop class="w-full h-full object-cover">
@@ -273,15 +593,15 @@
                         <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">4K</span>
                     </div>
                     
-                    <h1 class="text-5xl font-bold mb-4">Mountain's Peak</h1>
+                    <h1 class="text-3xl md:text-5xl font-bold mb-4">Mountain's Peak</h1>
                     <p class="text-gray-300 mb-6">An epic adventure of survival and discovery in the world's highest peaks. Follow a team of climbers as they face impossible odds.</p>
                     
-                    <div class="flex items-center space-x-4">
-                        <button onclick="playVideo()" class="px-8 py-3 gradient-bg rounded-full font-semibold flex items-center space-x-2">
+                    <div class="flex flex-wrap gap-4 hero-buttons">
+                        <button onclick="playVideo()" class="px-6 md:px-8 py-3 gradient-bg rounded-full font-semibold flex items-center space-x-2">
                             <i class="fas fa-play"></i>
                             <span>Play Now</span>
                         </button>
-                        <button onclick="addToWatchlist()" class="px-8 py-3 bg-gray-800 rounded-full font-semibold hover:bg-gray-700 transition flex items-center space-x-2">
+                        <button onclick="addToWatchlist()" class="px-6 md:px-8 py-3 bg-gray-800 rounded-full font-semibold hover:bg-gray-700 transition flex items-center space-x-2">
                             <i class="fas fa-plus"></i>
                             <span>Add to List</span>
                         </button>
@@ -298,370 +618,48 @@
             <!-- Continue Watching -->
             <section>
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-bold"><i class="fas fa-history mr-2"></i>Continue Watching</h2>
-                    <a href="#" class="text-green-400 hover:text-green-300 transition">View All</a>
+                    <h2 class="text-xl md:text-2xl font-bold"><i class="fas fa-history mr-2"></i>Continue Watching</h2>
+                    <a href="#continue" onclick="showViewAll('continue')" class="text-green-400 hover:text-green-300 transition text-sm md:text-base">View All</a>
                 </div>
                 
                 <div class="content-row">
-                    <!-- Video 1 -->
-                    <div class="flex-shrink-0 w-64">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', 'Elephants Dream')">
-                            <video class="w-full h-36 object-cover" poster="https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <div class="progress-bar mb-2">
-                                    <div class="progress-fill" style="width: 65%"></div>
-                                </div>
-                                <h3 class="font-semibold">Elephants Dream</h3>
-                                <p class="text-sm text-gray-400">45 min remaining</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Video 2 -->
-                    <div class="flex-shrink-0 w-64">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', 'For Bigger Blazes')">
-                            <video class="w-full h-36 object-cover" poster="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <div class="progress-bar mb-2">
-                                    <div class="progress-fill" style="width: 30%"></div>
-                                </div>
-                                <h3 class="font-semibold">For Bigger Blazes</h3>
-                                <p class="text-sm text-gray-400">1h 20min remaining</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 3 -->
-                    <div class="flex-shrink-0 w-64">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', 'For Bigger Escapes')">
-                            <video class="w-full h-36 object-cover" poster="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <div class="progress-bar mb-2">
-                                    <div class="progress-fill" style="width: 50%"></div>
-                                </div>
-                                <h3 class="font-semibold">For Bigger Escapes</h3>
-                                <p class="text-sm text-gray-400">30 min remaining</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 4 -->
-                    <div class="flex-shrink-0 w-64">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', 'For Bigger Fun')">
-                            <video class="w-full h-36 object-cover" poster="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <div class="progress-bar mb-2">
-                                    <div class="progress-fill" style="width: 80%"></div>
-                                </div>
-                                <h3 class="font-semibold">For Bigger Fun</h3>
-                                <p class="text-sm text-gray-400">15 min remaining</p>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Video cards will be populated by JavaScript -->
                 </div>
             </section>
 
             <!-- My List -->
             <section>
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-bold"><i class="fas fa-heart mr-2"></i>My List</h2>
-                    <a href="#" class="text-green-400 hover:text-green-300 transition">View All</a>
+                    <h2 class="text-xl md:text-2xl font-bold"><i class="fas fa-heart mr-2"></i>My List</h2>
+                    <a href="#mylist" onclick="showViewAll('mylist')" class="text-green-400 hover:text-green-300 transition text-sm md:text-base">View All</a>
                 </div>
                 
                 <div class="content-row">
-                    <!-- Video 1 -->
-                    <div class="flex-shrink-0 w-48">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', 'For Bigger Joyrides')">
-                            <video class="w-full h-64 object-cover" poster="https://images.unsplash.com/photo-1535016120720-40c646be5580?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <button onclick="removeFromWatchlist(this)" class="absolute top-4 right-4 w-10 h-10 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center transition z-10">
-                                <i class="fas fa-times"></i>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <h3 class="font-semibold">For Bigger Joyrides</h3>
-                                <p class="text-sm text-gray-400">Action • 2023</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Video 2 -->
-                    <div class="flex-shrink-0 w-48">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4', 'For Bigger Meltdowns')">
-                            <video class="w-full h-64 object-cover" poster="https://images.unsplash.com/photo-1551029506-0807df4e2031?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <button onclick="removeFromWatchlist(this)" class="absolute top-4 right-4 w-10 h-10 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center transition z-10">
-                                <i class="fas fa-times"></i>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <h3 class="font-semibold">For Bigger Meltdowns</h3>
-                                <p class="text-sm text-gray-400">Drama • 2022</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 3 -->
-                    <div class="flex-shrink-0 w-48">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', 'Sintel')">
-                            <video class="w-full h-64 object-cover" poster="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <button onclick="removeFromWatchlist(this)" class="absolute top-4 right-4 w-10 h-10 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center transition z-10">
-                                <i class="fas fa-times"></i>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <h3 class="font-semibold">Sintel</h3>
-                                <p class="text-sm text-gray-400">Fantasy • 2023</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 4 -->
-                    <div class="flex-shrink-0 w-48">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4', 'Subaru Adventure')">
-                            <video class="w-full h-64 object-cover" poster="https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <button onclick="removeFromWatchlist(this)" class="absolute top-4 right-4 w-10 h-10 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center transition z-10">
-                                <i class="fas fa-times"></i>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <h3 class="font-semibold">Subaru Adventure</h3>
-                                <p class="text-sm text-gray-400">Documentary • 2023</p>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Video cards will be populated by JavaScript -->
                 </div>
             </section>
 
             <!-- Recommended For You -->
             <section>
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-bold"><i class="fas fa-star mr-2"></i>Because You Watched Mountain's Peak</h2>
-                    <a href="#" class="text-green-400 hover:text-green-300 transition">View All</a>
+                    <h2 class="text-xl md:text-2xl font-bold"><i class="fas fa-star mr-2"></i>Because You Watched Mountain's Peak</h2>
+                    <a href="#recommended" onclick="showViewAll('recommended')" class="text-green-400 hover:text-green-300 transition text-sm md:text-base">View All</a>
                 </div>
                 
                 <div class="content-row">
-                    <!-- Video 1 -->
-                    <div class="flex-shrink-0 w-56">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4', 'Tears of Steel')">
-                            <video class="w-full h-72 object-cover" poster="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4">
-                                <h3 class="font-semibold text-lg">Tears of Steel</h3>
-                                <p class="text-sm text-gray-300">Sci-Fi • 95% Match</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Video 2 -->
-                    <div class="flex-shrink-0 w-56">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4', 'Volkswagen GTI Review')">
-                            <video class="w-full h-72 object-cover" poster="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4">
-                                <h3 class="font-semibold text-lg">Volkswagen GTI Review</h3>
-                                <p class="text-sm text-gray-300">Review • 89% Match</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 3 -->
-                    <div class="flex-shrink-0 w-56">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4', 'Bullrun Adventure')">
-                            <video class="w-full h-72 object-cover" poster="https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4">
-                                <h3 class="font-semibold text-lg">Bullrun Adventure</h3>
-                                <p class="text-sm text-gray-300">Adventure • 92% Match</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 4 -->
-                    <div class="flex-shrink-0 w-56">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4', 'What Car Can You Get')">
-                            <video class="w-full h-72 object-cover" poster="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4">
-                                <h3 class="font-semibold text-lg">What Car Can You Get</h3>
-                                <p class="text-sm text-gray-300">Auto • 87% Match</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 5 -->
-                    <div class="flex-shrink-0 w-56">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', 'Big Buck Bunny')">
-                            <video class="w-full h-72 object-cover" poster="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4">
-                                <h3 class="font-semibold text-lg">Big Buck Bunny</h3>
-                                <p class="text-sm text-gray-300">Animation • 94% Match</p>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Video cards will be populated by JavaScript -->
                 </div>
             </section>
 
-            <!-- New Section: Trending Now -->
+            <!-- Trending Now -->
             <section>
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-bold"><i class="fas fa-fire mr-2"></i>Trending Now</h2>
-                    <a href="#" class="text-green-400 hover:text-green-300 transition">View All</a>
+                    <h2 class="text-xl md:text-2xl font-bold"><i class="fas fa-fire mr-2"></i>Trending Now</h2>
+                    <a href="#trending" onclick="showViewAll('trending')" class="text-green-400 hover:text-green-300 transition text-sm md:text-base">View All</a>
                 </div>
                 
                 <div class="content-row">
-                    <!-- Video 1 -->
-                    <div class="flex-shrink-0 w-64">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', 'Elephants Dream')">
-                            <video class="w-full h-48 object-cover" poster="https://images.unsplash.com/photo-1512070679279-8988d32161be?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <h3 class="font-semibold">Elephants Dream</h3>
-                                <p class="text-sm text-gray-400">#1 Trending</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 2 -->
-                    <div class="flex-shrink-0 w-64">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4', 'For Bigger Meltdowns')">
-                            <video class="w-full h-48 object-cover" poster="https://images.unsplash.com/photo-1489599809516-9827b6d1cf13?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <h3 class="font-semibold">For Bigger Meltdowns</h3>
-                                <p class="text-sm text-gray-400">#2 Trending</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 3 -->
-                    <div class="flex-shrink-0 w-64">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4', 'Tears of Steel')">
-                            <video class="w-full h-48 object-cover" poster="https://images.unsplash.com/photo-1489599809516-9827b6d1cf13?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <h3 class="font-semibold">Tears of Steel</h3>
-                                <p class="text-sm text-gray-400">#3 Trending</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 4 -->
-                    <div class="flex-shrink-0 w-64">
-                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', 'Sintel')">
-                            <video class="w-full h-48 object-cover" poster="https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
-                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" type="video/mp4">
-                            </video>
-                            <div class="play-overlay">
-                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                                <h3 class="font-semibold">Sintel</h3>
-                                <p class="text-sm text-gray-400">#4 Trending</p>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Video cards will be populated by JavaScript -->
                 </div>
             </section>
         </div>
@@ -677,7 +675,7 @@
                 </button>
             </div>
             
-            <div class="p-6">
+            <div class="p-4 md:p-6">
                 <div class="relative bg-black rounded-lg overflow-hidden mb-6" style="padding-bottom: 56.25%">
                     <video id="mainVideoPlayer" class="absolute inset-0 w-full h-full" controls>
                         <source id="videoSource" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
@@ -687,27 +685,27 @@
                 
                 <!-- Player Controls -->
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap gap-4 items-center justify-between">
                         <div class="flex items-center space-x-4">
-                            <button onclick="togglePlayPause()" class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                            <button onclick="togglePlayPause()" class="w-10 h-10 md:w-12 md:h-12 gradient-bg rounded-full flex items-center justify-center">
                                 <i id="playPauseIcon" class="fas fa-play"></i>
                             </button>
-                            <button onclick="skipForward()" class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
+                            <button onclick="skipForward()" class="w-10 h-10 md:w-12 md:h-12 bg-gray-800 rounded-full flex items-center justify-center">
                                 <i class="fas fa-step-forward"></i>
                             </button>
-                            <button onclick="toggleMute()" class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
+                            <button onclick="toggleMute()" class="w-10 h-10 md:w-12 md:h-12 bg-gray-800 rounded-full flex items-center justify-center">
                                 <i id="volumeIcon" class="fas fa-volume-up"></i>
                             </button>
                         </div>
                         
-                        <div class="flex items-center space-x-4">
-                            <button onclick="togglePlaybackSpeed()" class="px-4 py-2 bg-gray-800 rounded-lg">
+                        <div class="flex items-center space-x-2 md:space-x-4">
+                            <button onclick="togglePlaybackSpeed()" class="px-3 py-2 md:px-4 md:py-2 bg-gray-800 rounded-lg text-sm">
                                 <span id="speedDisplay">1x</span>
                             </button>
-                            <button onclick="toggleQuality()" class="px-4 py-2 bg-gray-800 rounded-lg">
+                            <button onclick="toggleQuality()" class="px-3 py-2 md:px-4 md:py-2 bg-gray-800 rounded-lg text-sm">
                                 <span id="qualityDisplay">1080p</span>
                             </button>
-                            <button onclick="toggleSubtitles()" class="px-4 py-2 bg-gray-800 rounded-lg">
+                            <button onclick="toggleSubtitles()" class="px-3 py-2 md:px-4 md:py-2 bg-gray-800 rounded-lg">
                                 <i class="fas fa-closed-captioning"></i>
                             </button>
                         </div>
@@ -744,14 +742,14 @@
                 </button>
             </div>
             
-            <div class="p-6">
-                <div class="flex space-x-6">
+            <div class="p-4 md:p-6">
+                <div class="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
                     <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
-                         alt="Movie" class="w-48 h-64 object-cover rounded-lg">
+                         alt="Movie" class="w-full md:w-48 h-64 object-cover rounded-lg">
                     
                     <div class="flex-1">
                         <h2 class="text-2xl font-bold mb-2">Mountain's Peak</h2>
-                        <div class="flex items-center space-x-4 mb-4">
+                        <div class="flex flex-wrap items-center gap-2 md:gap-4 mb-4">
                             <span class="text-green-400">★ 8.5/10</span>
                             <span>2023</span>
                             <span>2h 15min</span>
@@ -760,7 +758,7 @@
                         
                         <p class="text-gray-300 mb-6">An epic adventure of survival and discovery in the world's highest peaks. Follow a team of climbers as they face impossible odds, pushing their physical and mental limits to reach the summit.</p>
                         
-                        <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <div>
                                 <p class="text-gray-500 text-sm">Director</p>
                                 <p class="font-semibold">Alex Rivera</p>
@@ -779,16 +777,16 @@
                             </div>
                         </div>
                         
-                        <div class="flex items-center space-x-4">
-                            <button onclick="playVideo()" class="px-6 py-3 gradient-bg rounded-lg font-semibold flex items-center space-x-2">
+                        <div class="flex flex-col md:flex-row md:items-center gap-4">
+                            <button onclick="playVideo()" class="px-6 py-3 gradient-bg rounded-lg font-semibold flex items-center justify-center space-x-2">
                                 <i class="fas fa-play"></i>
                                 <span>Play Movie</span>
                             </button>
-                            <button onclick="toggleWatchlist()" class="px-6 py-3 bg-gray-800 rounded-lg font-semibold hover:bg-gray-700 transition flex items-center space-x-2">
+                            <button onclick="toggleWatchlist()" class="px-6 py-3 bg-gray-800 rounded-lg font-semibold hover:bg-gray-700 transition flex items-center justify-center space-x-2">
                                 <i class="fas fa-plus" id="watchlistIcon"></i>
                                 <span id="watchlistText">Add to My List</span>
                             </button>
-                            <button onclick="downloadMovie()" class="px-6 py-3 bg-gray-800 rounded-lg font-semibold hover:bg-gray-700 transition flex items-center space-x-2">
+                            <button onclick="downloadMovie()" class="px-6 py-3 bg-gray-800 rounded-lg font-semibold hover:bg-gray-700 transition flex items-center justify-center space-x-2">
                                 <i class="fas fa-download"></i>
                                 <span>Download</span>
                             </button>
@@ -944,6 +942,270 @@
     </footer>
 
     <script>
+        // Current user
+                 // Current user
+        let currentUser = null;
+        
+        // Content data with video URLs
+        const viewAllContentData = {
+            continue: [
+                { 
+                    id: 1, 
+                    title: "Elephants Dream", 
+                    genre: "Animation", 
+                    year: 2023, 
+                    rating: "7.5", 
+                    duration: "1h 30m", 
+                    thumbnail: "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                    progress: 65 
+                },
+                { 
+                    id: 2, 
+                    title: "For Bigger Blazes", 
+                    genre: "Action", 
+                    year: 2023, 
+                    rating: "8.2", 
+                    duration: "2h 15m", 
+                    thumbnail: "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+                    progress: 30 
+                },
+                { 
+                    id: 3, 
+                    title: "For Bigger Escapes", 
+                    genre: "Adventure", 
+                    year: 2023, 
+                    rating: "7.8", 
+                    duration: "1h 45m", 
+                    thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+                    progress: 50 
+                },
+                { 
+                    id: 4, 
+                    title: "For Bigger Fun", 
+                    genre: "Comedy", 
+                    year: 2023, 
+                    rating: "8.0", 
+                    duration: "1h 55m", 
+                    thumbnail: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+                    progress: 80 
+                }
+            ],
+            mylist: [
+                { 
+                    id: 1, 
+                    title: "For Bigger Joyrides", 
+                    genre: "Action", 
+                    year: 2023, 
+                    rating: "8.5", 
+                    duration: "2h 5m", 
+                    thumbnail: "https://images.unsplash.com/photo-1535016120720-40c646be5580?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" 
+                },
+                { 
+                    id: 2, 
+                    title: "For Bigger Meltdowns", 
+                    genre: "Drama", 
+                    year: 2022, 
+                    rating: "8.1", 
+                    duration: "1h 50m", 
+                    thumbnail: "https://images.unsplash.com/photo-1551029506-0807df4e2031?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" 
+                },
+                { 
+                    id: 3, 
+                    title: "Sintel", 
+                    genre: "Fantasy", 
+                    year: 2023, 
+                    rating: "8.8", 
+                    duration: "1h 40m", 
+                    thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" 
+                },
+                { 
+                    id: 4, 
+                    title: "Subaru Adventure", 
+                    genre: "Documentary", 
+                    year: 2023, 
+                    rating: "8.3", 
+                    duration: "1h 35m", 
+                    thumbnail: "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4" 
+                }
+            ],
+            recommended: [
+                { 
+                    id: 1, 
+                    title: "Tears of Steel", 
+                    genre: "Sci-Fi", 
+                    year: 2023, 
+                    rating: "8.6", 
+                    match: "95%", 
+                    thumbnail: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" 
+                },
+                { 
+                    id: 2, 
+                    title: "Volkswagen GTI Review", 
+                    genre: "Review", 
+                    year: 2023, 
+                    rating: "7.9", 
+                    match: "89%", 
+                    thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4" 
+                },
+                { 
+                    id: 3, 
+                    title: "Bullrun Adventure", 
+                    genre: "Adventure", 
+                    year: 2023, 
+                    rating: "8.4", 
+                    match: "92%", 
+                    thumbnail: "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4" 
+                },
+                { 
+                    id: 4, 
+                    title: "What Car Can You Get", 
+                    genre: "Auto", 
+                    year: 2023, 
+                    rating: "7.7", 
+                    match: "87%", 
+                    thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4" 
+                }
+            ],
+            trending: [
+                { 
+                    id: 1, 
+                    title: "Elephants Dream", 
+                    genre: "Animation", 
+                    year: 2023, 
+                    rating: "8.5", 
+                    rank: "#1", 
+                    thumbnail: "https://images.unsplash.com/photo-1512070679279-8988d32161be?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" 
+                },
+                { 
+                    id: 2, 
+                    title: "For Bigger Meltdowns", 
+                    genre: "Drama", 
+                    year: 2022, 
+                    rating: "8.2", 
+                    rank: "#2", 
+                    thumbnail: "https://images.unsplash.com/photo-1489599809516-9827b6d1cf13?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" 
+                },
+                { 
+                    id: 3, 
+                    title: "Tears of Steel", 
+                    genre: "Sci-Fi", 
+                    year: 2023, 
+                    rating: "8.7", 
+                    rank: "#3", 
+                    thumbnail: "https://images.unsplash.com/photo-1489599809516-9827b6d1cf13?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" 
+                },
+                { 
+                    id: 4, 
+                    title: "Sintel", 
+                    genre: "Fantasy", 
+                    year: 2023, 
+                    rating: "8.8", 
+                    rank: "#4", 
+                    thumbnail: "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" 
+                }
+            ],
+            movies: [
+                { 
+                    id: 1, 
+                    title: "Mountain's Peak", 
+                    genre: "Adventure", 
+                    year: 2023, 
+                    rating: "9.1", 
+                    duration: "2h 15m", 
+                    thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" 
+                },
+                { 
+                    id: 2, 
+                    title: "Arctic Journey", 
+                    genre: "Documentary", 
+                    year: 2022, 
+                    rating: "8.7", 
+                    duration: "1h 45m", 
+                    thumbnail: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4" 
+                },
+                { 
+                    id: 3, 
+                    title: "Forest Whispers", 
+                    genre: "Thriller", 
+                    year: 2022, 
+                    rating: "7.9", 
+                    duration: "1h 58m", 
+                    thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" 
+                },
+                { 
+                    id: 4, 
+                    title: "Valley Echoes", 
+                    genre: "Drama", 
+                    year: 2021, 
+                    rating: "8.0", 
+                    duration: "2h 5m", 
+                    thumbnail: "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" 
+                }
+            ],
+            series: [
+                { 
+                    id: 1, 
+                    title: "Alpine Rescue", 
+                    genre: "Action", 
+                    seasons: 2, 
+                    episodes: 24, 
+                    rating: "8.2", 
+                    thumbnail: "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" 
+                },
+                { 
+                    id: 2, 
+                    title: "Space Odyssey", 
+                    genre: "Sci-Fi", 
+                    seasons: 3, 
+                    episodes: 36, 
+                    rating: "9.0", 
+                    thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" 
+                },
+                { 
+                    id: 3, 
+                    title: "City Lights", 
+                    genre: "Drama", 
+                    seasons: 4, 
+                    episodes: 48, 
+                    rating: "8.5", 
+                    thumbnail: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" 
+                },
+                { 
+                    id: 4, 
+                    title: "Wild Kingdom", 
+                    genre: "Documentary", 
+                    seasons: 5, 
+                    episodes: 60, 
+                    rating: "8.8", 
+                    thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", 
+                    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4" 
+                }
+            ]
+        };
+
         // Mock data for search
         const searchData = [
             { title: "Mountain's Peak", type: "Movie", year: 2023, genre: "Adventure" },
@@ -976,6 +1238,7 @@
         const playerModal = document.getElementById('playerModal');
         const detailsModal = document.getElementById('detailsModal');
         const subscriptionBanner = document.getElementById('subscriptionBanner');
+        const viewAllModal = document.getElementById('viewAllModal');
         const videoPlayer = document.getElementById('mainVideoPlayer');
         const videoSource = document.getElementById('videoSource');
         const playerTitle = document.getElementById('playerTitle');
@@ -984,6 +1247,325 @@
         const totalTime = document.getElementById('totalTime');
         const playPauseIcon = document.getElementById('playPauseIcon');
         const volumeIcon = document.getElementById('volumeIcon');
+        const profileInitial = document.getElementById('profileInitial');
+        const userName = document.getElementById('userName');
+        const dropdownUserName = document.getElementById('dropdownUserName');
+        const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+        const mobileProfileInitial = document.getElementById('mobileProfileInitial');
+        const mobileUserName = document.getElementById('mobileUserName');
+        const mobileUserEmail = document.getElementById('mobileUserEmail');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuBackdrop = document.getElementById('mobileMenuBackdrop');
+
+        // Check authentication on page load
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('mtprime_user'));
+            if (user) {
+                currentUser = user;
+                updateUserUI();
+                loadHomeContent();
+            } else {
+                // Redirect to login page if not logged in
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Update user interface
+        function updateUserUI() {
+            if (currentUser) {
+                // Update profile initial
+                const initial = currentUser.name.charAt(0).toUpperCase();
+                profileInitial.textContent = initial;
+                mobileProfileInitial.textContent = initial;
+                
+                // Update user name
+                userName.textContent = currentUser.name;
+                dropdownUserName.textContent = currentUser.name;
+                mobileUserName.textContent = currentUser.name;
+                
+                // Update user email
+                dropdownUserEmail.textContent = currentUser.email;
+                mobileUserEmail.textContent = currentUser.email;
+                
+                // Show trial status if user is on trial
+                if (currentUser.plan === 'Trial' && currentUser.trialDays > 0) {
+                    // Show trial badge
+                    document.getElementById('trialBadgeNav').classList.remove('hidden');
+                    document.getElementById('trialBadgeDropdown').classList.remove('hidden');
+                    
+                    // Show trial message
+                    const trialMessage = `${currentUser.trialDays} days left in trial`;
+                    document.getElementById('trialStatusMessage').textContent = trialMessage;
+                    document.getElementById('trialStatusMessage').classList.remove('hidden');
+                    document.getElementById('mobileTrialStatus').textContent = trialMessage;
+                    
+                    // Show upgrade encouragement
+                    setTimeout(() => {
+                        showToast(`You have ${currentUser.trialDays} days left in your trial. Upgrade now for full access!`, 'info');
+                    }, 2000);
+                }
+            }
+        }
+
+        // Logout function - FIXED TO REDIRECT
+        function logout() {
+            localStorage.removeItem('mtprime_user');
+            localStorage.removeItem('mtprime_logged_in');
+            showToast('You have been logged out', 'info');
+            
+            // Redirect to login page immediately
+            window.location.href = 'index.html';
+        }
+
+        // Toggle profile menu
+        function toggleProfileMenu() {
+            profileDropdown.classList.toggle('hidden');
+        }
+
+        function closeProfileMenu() {
+            profileDropdown.classList.add('hidden');
+        }
+
+        // View All functionality
+        function showViewAll(category) {
+            const modal = document.getElementById('viewAllModal');
+            const title = document.getElementById('viewAllTitle');
+            const content = document.getElementById('viewAllContent');
+            
+            // Set title based on category
+            const titles = {
+                'movies': 'All Movies',
+                'series': 'All Series',
+                'mylist': 'My List',
+                'continue': 'Continue Watching',
+                'recommended': 'Recommended For You',
+                'trending': 'Trending Now'
+            };
+            
+            title.textContent = titles[category] || 'All Content';
+            
+            // Load content for category
+            content.innerHTML = '';
+            const items = viewAllContentData[category] || [];
+            
+            if (items.length === 0) {
+                content.innerHTML = '<p class="text-gray-500 text-center col-span-full py-8">No content available</p>';
+            } else {
+                items.forEach(item => {
+                    const card = createViewAllCard(item, category);
+                    content.appendChild(card);
+                });
+            }
+            
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Create content card for View All
+        function createViewAllCard(item, category) {
+            const div = document.createElement('div');
+            div.className = 'card-hover video-thumbnail';
+            
+            let details = '';
+            if (category === 'continue') {
+                details = `${item.year} • ${item.genre} • ${item.duration}`;
+            } else if (category === 'mylist' || category === 'movies') {
+                details = `${item.year} • ${item.genre} • ${item.duration}`;
+            } else if (category === 'recommended') {
+                details = `${item.genre} • ${item.match} Match`;
+            } else if (category === 'trending') {
+                details = `${item.rank} Trending • ${item.genre}`;
+            } else if (category === 'series') {
+                details = `${item.seasons} Seasons • ${item.episodes} Episodes`;
+            }
+            
+            div.innerHTML = `
+                <div class="relative rounded-lg overflow-hidden h-48" onclick="playSpecificVideo('${item.video}', '${item.title}')">
+                    <img src="${item.thumbnail}" alt="${item.title}" class="w-full h-full object-cover">
+                    <video class="card-video" preload="none" muted loop playsinline>
+                        <source src="${item.video}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="play-overlay">
+                        <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                    <div class="absolute top-2 right-2 z-3">
+                        <span class="px-2 py-1 bg-gray-900/80 rounded text-xs">${item.rating}/10</span>
+                    </div>
+                    ${category === 'continue' ? `<div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/90 to-transparent z-3">
+                        <div class="progress-bar mb-1">
+                            <div class="progress-fill" style="width: ${item.progress}%"></div>
+                        </div>
+                    </div>` : ''}
+                </div>
+                <div class="p-3">
+                    <h4 class="font-semibold truncate mb-1">${item.title}</h4>
+                    <p class="text-sm text-gray-400">${details}</p>
+                </div>
+            `;
+            
+            // Add hover events for video preview - FIXED
+            const video = div.querySelector('video');
+            div.addEventListener('mouseenter', () => {
+                if (video && video.paused) {
+                    video.play().catch(e => console.log("Video play failed:", e));
+                }
+            });
+            div.addEventListener('mouseleave', () => {
+                if (video && !video.paused) {
+                    video.pause();
+                    video.currentTime = 0;
+                }
+            });
+            
+            return div;
+        }
+
+        // Search in View All
+        function searchInViewAll() {
+            const searchTerm = document.getElementById('viewAllSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('#viewAllContent > div');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('h4').textContent.toLowerCase();
+                const details = card.querySelector('p').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || details.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Close View All modal
+        function closeViewAll() {
+            viewAllModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Load more content
+        function loadMoreContent() {
+            showToast('Loading more content...', 'info');
+            // In a real app, this would load more items from API
+            setTimeout(() => {
+                showToast('More content loaded!', 'success');
+            }, 1000);
+        }
+
+        // Load home page content
+        function loadHomeContent() {
+            // Populate home page sections
+            populateSection('continue', viewAllContentData.continue.slice(0, 4));
+            populateSection('mylist', viewAllContentData.mylist.slice(0, 4));
+            populateSection('recommended', viewAllContentData.recommended.slice(0, 4));
+            populateSection('trending', viewAllContentData.trending.slice(0, 4));
+        }
+
+        // Populate a section on home page
+        function populateSection(sectionId, items) {
+            const section = document.querySelector(`[onclick*="${sectionId}"]`).parentElement.nextElementSibling;
+            if (!section) return;
+            
+            section.innerHTML = '';
+            
+            items.forEach(item => {
+                const card = createHomeCard(item, sectionId);
+                section.appendChild(card);
+            });
+        }
+
+        // Create home page card with video
+        function createHomeCard(item, category) {
+            const div = document.createElement('div');
+            let widthClass = 'w-48 md:w-64';
+            
+            if (category === 'mylist') widthClass = 'w-40 md:w-48';
+            if (category === 'recommended') widthClass = 'w-48 md:w-56';
+            if (category === 'trending') widthClass = 'w-48 md:w-64';
+            
+            div.className = `flex-shrink-0 content-card ${widthClass}`;
+            
+            let details = '';
+            let extraContent = '';
+            
+            if (category === 'continue') {
+                details = `${item.year} • ${item.genre} • ${item.duration}`;
+                extraContent = `
+                    <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent z-3">
+                        <div class="progress-bar mb-2">
+                            <div class="progress-fill" style="width: ${item.progress}%"></div>
+                        </div>
+                        <h3 class="font-semibold text-sm md:text-base">${item.title}</h3>
+                        <p class="text-xs md:text-sm text-gray-400">${Math.floor((100 - item.progress) * 1.8)} min remaining</p>
+                    </div>
+                `;
+            } else if (category === 'mylist') {
+                details = `${item.genre} • ${item.year}`;
+                extraContent = `
+                    <button onclick="removeFromWatchlist(this)" class="absolute top-2 right-2 md:top-4 md:right-4 w-8 h-8 md:w-10 md:h-10 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center transition z-10">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="absolute bottom-0 left-0 right-0 p-3 md:p-4 bg-gradient-to-t from-black/90 to-transparent z-3">
+                        <h3 class="font-semibold text-sm md:text-base">${item.title}</h3>
+                        <p class="text-xs md:text-sm text-gray-400">${details}</p>
+                    </div>
+                `;
+            } else if (category === 'recommended') {
+                details = `${item.genre} • ${item.match} Match`;
+                extraContent = `
+                    <div class="absolute bottom-0 left-0 right-0 p-3 md:p-4 z-3">
+                        <h3 class="font-semibold text-sm md:text-lg">${item.title}</h3>
+                        <p class="text-xs md:text-sm text-gray-300">${details}</p>
+                    </div>
+                `;
+            } else if (category === 'trending') {
+                details = `${item.rank} Trending`;
+                extraContent = `
+                    <div class="absolute bottom-0 left-0 right-0 p-3 md:p-4 bg-gradient-to-t from-black/90 to-transparent z-3">
+                        <h3 class="font-semibold text-sm md:text-base">${item.title}</h3>
+                        <p class="text-xs md:text-sm text-gray-400">${details}</p>
+                    </div>
+                `;
+            }
+            
+            div.innerHTML = `
+                <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail h-48" onclick="playSpecificVideo('${item.video}', '${item.title}')">
+                    <img src="${item.thumbnail}" alt="${item.title}" class="w-full h-full object-cover">
+                    <video class="card-video" preload="none" muted loop playsinline>
+                        <source src="${item.video}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="play-overlay">
+                        <div class="w-10 h-10 md:w-12 md:h-12 gradient-bg rounded-full flex items-center justify-center">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                    ${extraContent}
+                </div>
+            `;
+            
+            // Add hover events for video preview - FIXED
+            const video = div.querySelector('video');
+            const card = div.querySelector('.video-thumbnail');
+            
+            card.addEventListener('mouseenter', () => {
+                if (video && video.paused) {
+                    video.play().catch(e => console.log("Video play failed:", e));
+                }
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                if (video && !video.paused) {
+                    video.pause();
+                    video.currentTime = 0;
+                }
+            });
+            
+            return div;
+        }
 
         // Video player functions
         function playSpecificVideo(videoSrc, videoTitle) {
@@ -1087,16 +1669,11 @@
                     </div>
                 `;
                 resultElement.onclick = () => {
-                    alert(`Selected: ${item.title}`);
+                    showToast(`Selected: ${item.title}`);
                     toggleSearch();
                 };
                 searchResults.appendChild(resultElement);
             });
-        }
-
-        // Profile dropdown
-        function toggleProfileMenu() {
-            profileDropdown.classList.toggle('hidden');
         }
 
         // Notifications
@@ -1112,7 +1689,7 @@
         }
 
         function downloadMovie() {
-            alert('Download started! The movie will be available offline shortly.');
+            showToast('Download started! The movie will be available offline shortly.');
             if (!downloadManagerVisible) {
                 toggleDownloadManager();
             }
@@ -1204,7 +1781,7 @@
 
         // Subscription management
         function manageSubscription() {
-            alert('Redirecting to subscription management...');
+            showToast('Redirecting to subscription management...');
             closeBanner();
         }
 
@@ -1214,13 +1791,17 @@
 
         // View downloads
         function viewDownloads() {
-            alert('Opening downloads page...');
+            showToast('Opening downloads page...');
         }
 
         // Toast notifications
-        function showToast(message) {
+        function showToast(message, type = 'info') {
             const toast = document.createElement('div');
-            toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-xl z-50';
+            toast.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-xl z-50 animate-slide-in ${
+                type === 'error' ? 'bg-red-500' : 
+                type === 'success' ? 'bg-green-500' : 
+                'bg-gray-800'
+            }`;
             toast.textContent = message;
             document.body.appendChild(toast);
             
@@ -1229,17 +1810,40 @@
             }, 3000);
         }
 
-        // Video hover play functionality
-        document.querySelectorAll('.video-thumbnail video').forEach(video => {
-            video.addEventListener('mouseenter', function() {
-                this.play();
-            });
+        // Mobile menu functions
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('active');
+            mobileMenuBackdrop.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : 'auto';
+        }
+
+        // Add animation style
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slide-in {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
             
-            video.addEventListener('mouseleave', function() {
-                this.pause();
-                this.currentTime = 0;
-            });
-        });
+            .animate-slide-in {
+                animation: slide-in 0.3s ease;
+            }
+            
+            .active-filter {
+                background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) !important;
+                color: white !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', checkAuth);
 
         // Close modals when clicking outside
         window.onclick = function(event) {
@@ -1249,23 +1853,41 @@
             if (event.target === detailsModal) {
                 closeDetails();
             }
-            if (!event.target.closest('#profileDropdown') && !event.target.closest('.group button')) {
-                profileDropdown.classList.add('hidden');
+            if (event.target === viewAllModal) {
+                closeViewAll();
+            }
+            if (event.target === mobileMenuBackdrop) {
+                toggleMobileMenu();
+            }
+            if (!event.target.closest('#profileDropdown') && !event.target.closest('#profileSection')) {
+                closeProfileMenu();
             }
             if (!event.target.closest('#notificationsPanel') && !event.target.closest('.relative button')) {
                 notificationsPanel.classList.add('hidden');
             }
-        }
+        };
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            // Show subscription banner after 5 seconds
-            setTimeout(() => {
-                subscriptionBanner.style.display = 'block';
-            }, 5000);
-            
-            // Initialize search results
-            handleSearch();
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closePlayer();
+                closeDetails();
+                closeViewAll();
+                if (mobileMenu.classList.contains('active')) {
+                    toggleMobileMenu();
+                }
+            }
+            if (e.key === '/' && e.ctrlKey) {
+                e.preventDefault();
+                toggleSearch();
+            }
+        });
+
+        // Close mobile menu on resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768 && mobileMenu.classList.contains('active')) {
+                toggleMobileMenu();
+            }
         });
     </script>
 </body>
