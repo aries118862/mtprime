@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mtprime - Premium Streaming</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gradient-start: #6FCF97;
+            --gradient-end: #2F80ED;
+            --primary-green: #27AE60;
+            --dark-bg: #0f172a;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark-bg);
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        .logo-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .play-button {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .play-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: #1e293b;
+            border-radius: 12px;
+            max-width: 800px;
+            margin: 2rem auto;
+            animation: modalFade 0.3s ease;
+        }
+        
+        @keyframes modalFade {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 2px;
+        }
+        
+        .content-row {
+            display: flex;
+            overflow-x: auto;
+            gap: 1rem;
+            padding: 1rem 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-green) transparent;
+        }
+        
+        .content-row::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .content-row::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .content-row::-webkit-scrollbar-thumb {
+            background: var(--primary-green);
+            border-radius: 3px;
+        }
+        
+        .search-result {
+            transition: all 0.2s ease;
+        }
+        
+        .search-result:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(4px);
+        }
+        
+        .video-thumbnail {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .video-thumbnail:hover .play-overlay {
+            opacity: 1;
+        }
+        
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-900/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-800">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Logo - Replaced triangle with logo.png -->
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img src="logo.png" alt="mtprime logo" class="w-full h-full object-contain">
+                </div>
+                <div class="logo-font text-2xl font-bold">
+                    <span class="text-white">mt</span><span class="text-green-500">prime</span>
+                </div>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#" class="text-white hover:text-green-400 transition"><i class="fas fa-home mr-2"></i>Home</a>
+                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fas fa-film mr-2"></i>Movies</a>
+                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fas fa-tv mr-2"></i>Series</a>
+                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fas fa-heart mr-2"></i>My List</a>
+            </div>
+            
+            <!-- Right Section -->
+            <div class="flex items-center space-x-4">
+                <!-- Search -->
+                <button onclick="toggleSearch()" class="text-gray-400 hover:text-white transition">
+                    <i class="fas fa-search"></i>
+                </button>
+                
+                <!-- Notifications -->
+                <div class="relative">
+                    <button onclick="toggleNotifications()" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <div class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center">3</div>
+                </div>
+                
+                <!-- Profile -->
+                <div class="relative group">
+                    <button onclick="toggleProfileMenu()" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center">
+                            <span class="font-semibold">J</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </button>
+                    
+                    <!-- Profile Dropdown -->
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl py-2">
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-700"><i class="fas fa-user mr-2"></i>Manage Profiles</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-700"><i class="fas fa-cog mr-2"></i>Account Settings</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-700"><i class="fas fa-download mr-2"></i>Downloads</a>
+                        <hr class="border-gray-700 my-2">
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-700 text-red-400"><i class="fas fa-sign-out-alt mr-2"></i>Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search Overlay -->
+    <div id="searchOverlay" class="fixed inset-0 bg-gray-900/95 z-50 hidden">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex items-center justify-between mb-6">
+                <div class="logo-font text-3xl">
+                    <span class="text-white">mt</span><span class="text-green-500">prime</span>
+                </div>
+                <button onclick="toggleSearch()" class="text-2xl text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="max-w-3xl mx-auto">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search movies, series, actors..." 
+                           class="w-full bg-gray-800 border-2 border-gray-700 rounded-full py-4 px-6 text-lg focus:outline-none focus:border-green-500 transition"
+                           oninput="handleSearch()">
+                    <button class="absolute right-4 top-4 text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <!-- Search Filters -->
+                <div class="flex flex-wrap gap-4 my-6">
+                    <button class="px-4 py-2 bg-gray-800 rounded-full hover:bg-gray-700 transition">Movies</button>
+                    <button class="px-4 py-2 bg-gray-800 rounded-full hover:bg-gray-700 transition">Series</button>
+                    <button class="px-4 py-2 bg-gray-800 rounded-full hover:bg-gray-700 transition">Action</button>
+                    <button class="px-4 py-2 bg-gray-800 rounded-full hover:bg-gray-700 transition">Drama</button>
+                    <button class="px-4 py-2 bg-gray-800 rounded-full hover:bg-gray-700 transition">2023</button>
+                </div>
+                
+                <!-- Search Results -->
+                <div id="searchResults" class="mt-8 space-y-2">
+                    <!-- Results will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Banner with Video -->
+        <section class="relative h-[70vh] overflow-hidden">
+            <div class="absolute inset-0">
+                <!-- Embed real video -->
+                <video autoplay muted loop class="w-full h-full object-cover">
+                    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/80 to-transparent"></div>
+            </div>
+            
+            <div class="relative container mx-auto px-4 h-full flex items-center">
+                <div class="max-w-xl">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">NEW</span>
+                        <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">2023</span>
+                        <span class="px-3 py-1 bg-gray-800 rounded-full text-sm">4K</span>
+                    </div>
+                    
+                    <h1 class="text-5xl font-bold mb-4">Mountain's Peak</h1>
+                    <p class="text-gray-300 mb-6">An epic adventure of survival and discovery in the world's highest peaks. Follow a team of climbers as they face impossible odds.</p>
+                    
+                    <div class="flex items-center space-x-4">
+                        <button onclick="playVideo()" class="px-8 py-3 gradient-bg rounded-full font-semibold flex items-center space-x-2">
+                            <i class="fas fa-play"></i>
+                            <span>Play Now</span>
+                        </button>
+                        <button onclick="addToWatchlist()" class="px-8 py-3 bg-gray-800 rounded-full font-semibold hover:bg-gray-700 transition flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Add to List</span>
+                        </button>
+                        <button onclick="showDetails()" class="w-12 h-12 play-button rounded-full flex items-center justify-center">
+                            <i class="fas fa-info"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Sections with Videos -->
+        <div class="container mx-auto px-4 py-8 space-y-12">
+            <!-- Continue Watching -->
+            <section>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold"><i class="fas fa-history mr-2"></i>Continue Watching</h2>
+                    <a href="#" class="text-green-400 hover:text-green-300 transition">View All</a>
+                </div>
+                
+                <div class="content-row">
+                    <!-- Video 1 -->
+                    <div class="flex-shrink-0 w-64">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', 'Elephants Dream')">
+                            <video class="w-full h-36 object-cover" poster="https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <div class="progress-bar mb-2">
+                                    <div class="progress-fill" style="width: 65%"></div>
+                                </div>
+                                <h3 class="font-semibold">Elephants Dream</h3>
+                                <p class="text-sm text-gray-400">45 min remaining</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Video 2 -->
+                    <div class="flex-shrink-0 w-64">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', 'For Bigger Blazes')">
+                            <video class="w-full h-36 object-cover" poster="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <div class="progress-bar mb-2">
+                                    <div class="progress-fill" style="width: 30%"></div>
+                                </div>
+                                <h3 class="font-semibold">For Bigger Blazes</h3>
+                                <p class="text-sm text-gray-400">1h 20min remaining</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 3 -->
+                    <div class="flex-shrink-0 w-64">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', 'For Bigger Escapes')">
+                            <video class="w-full h-36 object-cover" poster="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <div class="progress-bar mb-2">
+                                    <div class="progress-fill" style="width: 50%"></div>
+                                </div>
+                                <h3 class="font-semibold">For Bigger Escapes</h3>
+                                <p class="text-sm text-gray-400">30 min remaining</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 4 -->
+                    <div class="flex-shrink-0 w-64">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', 'For Bigger Fun')">
+                            <video class="w-full h-36 object-cover" poster="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <div class="progress-bar mb-2">
+                                    <div class="progress-fill" style="width: 80%"></div>
+                                </div>
+                                <h3 class="font-semibold">For Bigger Fun</h3>
+                                <p class="text-sm text-gray-400">15 min remaining</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- My List -->
+            <section>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold"><i class="fas fa-heart mr-2"></i>My List</h2>
+                    <a href="#" class="text-green-400 hover:text-green-300 transition">View All</a>
+                </div>
+                
+                <div class="content-row">
+                    <!-- Video 1 -->
+                    <div class="flex-shrink-0 w-48">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', 'For Bigger Joyrides')">
+                            <video class="w-full h-64 object-cover" poster="https://images.unsplash.com/photo-1535016120720-40c646be5580?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <button onclick="removeFromWatchlist(this)" class="absolute top-4 right-4 w-10 h-10 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center transition z-10">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <h3 class="font-semibold">For Bigger Joyrides</h3>
+                                <p class="text-sm text-gray-400">Action • 2023</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Video 2 -->
+                    <div class="flex-shrink-0 w-48">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4', 'For Bigger Meltdowns')">
+                            <video class="w-full h-64 object-cover" poster="https://images.unsplash.com/photo-1551029506-0807df4e2031?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <button onclick="removeFromWatchlist(this)" class="absolute top-4 right-4 w-10 h-10 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center transition z-10">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <h3 class="font-semibold">For Bigger Meltdowns</h3>
+                                <p class="text-sm text-gray-400">Drama • 2022</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 3 -->
+                    <div class="flex-shrink-0 w-48">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', 'Sintel')">
+                            <video class="w-full h-64 object-cover" poster="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <button onclick="removeFromWatchlist(this)" class="absolute top-4 right-4 w-10 h-10 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center transition z-10">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <h3 class="font-semibold">Sintel</h3>
+                                <p class="text-sm text-gray-400">Fantasy • 2023</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 4 -->
+                    <div class="flex-shrink-0 w-48">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4', 'Subaru Adventure')">
+                            <video class="w-full h-64 object-cover" poster="https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <button onclick="removeFromWatchlist(this)" class="absolute top-4 right-4 w-10 h-10 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center transition z-10">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <h3 class="font-semibold">Subaru Adventure</h3>
+                                <p class="text-sm text-gray-400">Documentary • 2023</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recommended For You -->
+            <section>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold"><i class="fas fa-star mr-2"></i>Because You Watched Mountain's Peak</h2>
+                    <a href="#" class="text-green-400 hover:text-green-300 transition">View All</a>
+                </div>
+                
+                <div class="content-row">
+                    <!-- Video 1 -->
+                    <div class="flex-shrink-0 w-56">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4', 'Tears of Steel')">
+                            <video class="w-full h-72 object-cover" poster="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4">
+                                <h3 class="font-semibold text-lg">Tears of Steel</h3>
+                                <p class="text-sm text-gray-300">Sci-Fi • 95% Match</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Video 2 -->
+                    <div class="flex-shrink-0 w-56">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4', 'Volkswagen GTI Review')">
+                            <video class="w-full h-72 object-cover" poster="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4">
+                                <h3 class="font-semibold text-lg">Volkswagen GTI Review</h3>
+                                <p class="text-sm text-gray-300">Review • 89% Match</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 3 -->
+                    <div class="flex-shrink-0 w-56">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4', 'Bullrun Adventure')">
+                            <video class="w-full h-72 object-cover" poster="https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4">
+                                <h3 class="font-semibold text-lg">Bullrun Adventure</h3>
+                                <p class="text-sm text-gray-300">Adventure • 92% Match</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 4 -->
+                    <div class="flex-shrink-0 w-56">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4', 'What Car Can You Get')">
+                            <video class="w-full h-72 object-cover" poster="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4">
+                                <h3 class="font-semibold text-lg">What Car Can You Get</h3>
+                                <p class="text-sm text-gray-300">Auto • 87% Match</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 5 -->
+                    <div class="flex-shrink-0 w-56">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', 'Big Buck Bunny')">
+                            <video class="w-full h-72 object-cover" poster="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4">
+                                <h3 class="font-semibold text-lg">Big Buck Bunny</h3>
+                                <p class="text-sm text-gray-300">Animation • 94% Match</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- New Section: Trending Now -->
+            <section>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold"><i class="fas fa-fire mr-2"></i>Trending Now</h2>
+                    <a href="#" class="text-green-400 hover:text-green-300 transition">View All</a>
+                </div>
+                
+                <div class="content-row">
+                    <!-- Video 1 -->
+                    <div class="flex-shrink-0 w-64">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', 'Elephants Dream')">
+                            <video class="w-full h-48 object-cover" poster="https://images.unsplash.com/photo-1512070679279-8988d32161be?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <h3 class="font-semibold">Elephants Dream</h3>
+                                <p class="text-sm text-gray-400">#1 Trending</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 2 -->
+                    <div class="flex-shrink-0 w-64">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4', 'For Bigger Meltdowns')">
+                            <video class="w-full h-48 object-cover" poster="https://images.unsplash.com/photo-1489599809516-9827b6d1cf13?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <h3 class="font-semibold">For Bigger Meltdowns</h3>
+                                <p class="text-sm text-gray-400">#2 Trending</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 3 -->
+                    <div class="flex-shrink-0 w-64">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4', 'Tears of Steel')">
+                            <video class="w-full h-48 object-cover" poster="https://images.unsplash.com/photo-1489599809516-9827b6d1cf13?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <h3 class="font-semibold">Tears of Steel</h3>
+                                <p class="text-sm text-gray-400">#3 Trending</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 4 -->
+                    <div class="flex-shrink-0 w-64">
+                        <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail" onclick="playSpecificVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', 'Sintel')">
+                            <video class="w-full h-48 object-cover" poster="https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" type="video/mp4">
+                            </video>
+                            <div class="play-overlay">
+                                <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+                                <h3 class="font-semibold">Sintel</h3>
+                                <p class="text-sm text-gray-400">#4 Trending</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Player Modal -->
+    <div id="playerModal" class="modal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h3 id="playerTitle" class="text-xl font-bold">Mountain's Peak</h3>
+                <button onclick="closePlayer()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <div class="relative bg-black rounded-lg overflow-hidden mb-6" style="padding-bottom: 56.25%">
+                    <video id="mainVideoPlayer" class="absolute inset-0 w-full h-full" controls>
+                        <source id="videoSource" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                
+                <!-- Player Controls -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <button onclick="togglePlayPause()" class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                <i id="playPauseIcon" class="fas fa-play"></i>
+                            </button>
+                            <button onclick="skipForward()" class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
+                                <i class="fas fa-step-forward"></i>
+                            </button>
+                            <button onclick="toggleMute()" class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
+                                <i id="volumeIcon" class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <button onclick="togglePlaybackSpeed()" class="px-4 py-2 bg-gray-800 rounded-lg">
+                                <span id="speedDisplay">1x</span>
+                            </button>
+                            <button onclick="toggleQuality()" class="px-4 py-2 bg-gray-800 rounded-lg">
+                                <span id="qualityDisplay">1080p</span>
+                            </button>
+                            <button onclick="toggleSubtitles()" class="px-4 py-2 bg-gray-800 rounded-lg">
+                                <i class="fas fa-closed-captioning"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="space-y-2">
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-400">
+                            <span id="currentTime">0:00</span>
+                            <span id="totalTime">0:00</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Skip Intro Button -->
+                    <button onclick="skipIntro()" class="w-full py-3 gradient-bg rounded-lg font-semibold flex items-center justify-center space-x-2">
+                        <i class="fas fa-forward"></i>
+                        <span>Skip Intro (0:45)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h3 class="text-xl font-bold">Movie Details</h3>
+                <button onclick="closeDetails()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <div class="flex space-x-6">
+                    <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                         alt="Movie" class="w-48 h-64 object-cover rounded-lg">
+                    
+                    <div class="flex-1">
+                        <h2 class="text-2xl font-bold mb-2">Mountain's Peak</h2>
+                        <div class="flex items-center space-x-4 mb-4">
+                            <span class="text-green-400">★ 8.5/10</span>
+                            <span>2023</span>
+                            <span>2h 15min</span>
+                            <span class="px-2 py-1 bg-gray-800 rounded text-sm">PG-13</span>
+                        </div>
+                        
+                        <p class="text-gray-300 mb-6">An epic adventure of survival and discovery in the world's highest peaks. Follow a team of climbers as they face impossible odds, pushing their physical and mental limits to reach the summit.</p>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <p class="text-gray-500 text-sm">Director</p>
+                                <p class="font-semibold">Alex Rivera</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Cast</p>
+                                <p class="font-semibold">Michael Stone, Sarah Chen, James Wilson</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Genre</p>
+                                <p class="font-semibold">Adventure, Drama</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Language</p>
+                                <p class="font-semibold">English [CC]</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <button onclick="playVideo()" class="px-6 py-3 gradient-bg rounded-lg font-semibold flex items-center space-x-2">
+                                <i class="fas fa-play"></i>
+                                <span>Play Movie</span>
+                            </button>
+                            <button onclick="toggleWatchlist()" class="px-6 py-3 bg-gray-800 rounded-lg font-semibold hover:bg-gray-700 transition flex items-center space-x-2">
+                                <i class="fas fa-plus" id="watchlistIcon"></i>
+                                <span id="watchlistText">Add to My List</span>
+                            </button>
+                            <button onclick="downloadMovie()" class="px-6 py-3 bg-gray-800 rounded-lg font-semibold hover:bg-gray-700 transition flex items-center space-x-2">
+                                <i class="fas fa-download"></i>
+                                <span>Download</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Panel -->
+    <div id="notificationsPanel" class="fixed top-16 right-4 w-80 bg-gray-800 rounded-lg shadow-xl z-50 hidden">
+        <div class="p-4 border-b border-gray-700">
+            <h3 class="font-bold">Notifications</h3>
+        </div>
+        
+        <div class="max-h-96 overflow-y-auto">
+            <div class="p-4 border-b border-gray-700 hover:bg-gray-700/50 transition">
+                <div class="flex items-start space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+                        <i class="fas fa-film"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold">New Episode Available</p>
+                        <p class="text-sm text-gray-400">Season 2 of "Alpine Rescue" is now streaming</p>
+                        <p class="text-xs text-gray-500 mt-1">2 hours ago</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 border-b border-gray-700 hover:bg-gray-700/50 transition">
+                <div class="flex items-start space-x-3">
+                    <div class="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-green-400"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold">Payment Successful</p>
+                        <p class="text-sm text-gray-400">Your Premium subscription has been renewed</p>
+                        <p class="text-xs text-gray-500 mt-1">1 day ago</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-4">
+            <a href="#" class="block text-center text-green-400 hover:text-green-300 transition">View All Notifications</a>
+        </div>
+    </div>
+
+    <!-- Download Manager -->
+    <div id="downloadManager" class="fixed bottom-4 right-4 w-80 bg-gray-800 rounded-lg shadow-xl z-40 hidden">
+        <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+            <h3 class="font-bold"><i class="fas fa-download mr-2"></i>Downloads</h3>
+            <button onclick="toggleDownloadManager()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="p-4">
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-semibold">Mountain's Peak</p>
+                        <p class="text-sm text-gray-400">1.2 GB • 1080p</p>
+                    </div>
+                    <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-semibold">Arctic Journey</p>
+                        <p class="text-sm text-gray-400">Downloading • 65%</p>
+                    </div>
+                    <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                        <span class="text-xs">65%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="viewDownloads()" class="w-full mt-4 py-2 gradient-bg rounded-lg font-semibold">
+                View All Downloads
+            </button>
+        </div>
+    </div>
+
+    <!-- Subscription Banner -->
+    <div id="subscriptionBanner" class="fixed bottom-4 left-4 bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-500/30 rounded-lg p-4 max-w-md shadow-xl z-40">
+        <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold">Premium Experience</h3>
+            <button onclick="closeBanner()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <p class="text-sm text-gray-300 mb-3">Upgrade to Premium for 4K streaming, multiple screens, and offline downloads.</p>
+        <button onclick="manageSubscription()" class="w-full py-2 gradient-bg rounded-lg font-semibold">
+            Upgrade Now
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900/50 border-t border-gray-800 mt-12">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="logo-font text-2xl font-bold mb-4">
+                        <span class="text-white">mt</span><span class="text-green-500">prime</span>
+                    </div>
+                    <p class="text-gray-400">Premium streaming for adventure seekers and film enthusiasts.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Explore</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">Movies</a></li>
+                        <li><a href="#" class="hover:text-white transition">Series</a></li>
+                        <li><a href="#" class="hover:text-white transition">Documentaries</a></li>
+                        <li><a href="#" class="hover:text-white transition">New Releases</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Account</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">Manage Profiles</a></li>
+                        <li><a href="#" class="hover:text-white transition">Parental Controls</a></li>
+                        <li><a href="#" class="hover:text-white transition">Subscription</a></li>
+                        <li><a href="#" class="hover:text-white transition">Help Center</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Connect</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
+                <p>© 2023 mtprime Streaming. All rights reserved. | <a href="#" class="hover:text-white transition">Privacy Policy</a> | <a href="#" class="hover:text-white transition">Terms of Service</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mock data for search
+        const searchData = [
+            { title: "Mountain's Peak", type: "Movie", year: 2023, genre: "Adventure" },
+            { title: "Arctic Journey", type: "Movie", year: 2022, genre: "Documentary" },
+            { title: "Alpine Rescue", type: "Series", year: 2023, genre: "Action" },
+            { title: "Valley Echoes", type: "Movie", year: 2021, genre: "Drama" },
+            { title: "Forest Whispers", type: "Movie", year: 2022, genre: "Thriller" },
+            { title: "Everest Dreams", type: "Documentary", year: 2023, genre: "Adventure" }
+        ];
+
+        // State management
+        let isWatchlisted = false;
+        let playbackSpeed = 1;
+        let quality = '1080p';
+        let subtitlesEnabled = false;
+        let notificationsVisible = false;
+        let downloadManagerVisible = false;
+        let currentVideo = {
+            src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            title: "Mountain's Peak"
+        };
+
+        // DOM Elements
+        const searchOverlay = document.getElementById('searchOverlay');
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const profileDropdown = document.getElementById('profileDropdown');
+        const notificationsPanel = document.getElementById('notificationsPanel');
+        const downloadManager = document.getElementById('downloadManager');
+        const playerModal = document.getElementById('playerModal');
+        const detailsModal = document.getElementById('detailsModal');
+        const subscriptionBanner = document.getElementById('subscriptionBanner');
+        const videoPlayer = document.getElementById('mainVideoPlayer');
+        const videoSource = document.getElementById('videoSource');
+        const playerTitle = document.getElementById('playerTitle');
+        const progressFill = document.getElementById('progressFill');
+        const currentTime = document.getElementById('currentTime');
+        const totalTime = document.getElementById('totalTime');
+        const playPauseIcon = document.getElementById('playPauseIcon');
+        const volumeIcon = document.getElementById('volumeIcon');
+
+        // Video player functions
+        function playSpecificVideo(videoSrc, videoTitle) {
+            currentVideo.src = videoSrc;
+            currentVideo.title = videoTitle;
+            videoSource.src = videoSrc;
+            playerTitle.textContent = videoTitle;
+            videoPlayer.load();
+            playVideo();
+            videoPlayer.play();
+            playPauseIcon.className = 'fas fa-pause';
+        }
+
+        function updateVideoProgress() {
+            if (videoPlayer.duration) {
+                const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+                progressFill.style.width = `${progress}%`;
+                currentTime.textContent = formatTime(videoPlayer.currentTime);
+                totalTime.textContent = formatTime(videoPlayer.duration);
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function togglePlayPause() {
+            if (videoPlayer.paused) {
+                videoPlayer.play();
+                playPauseIcon.className = 'fas fa-pause';
+            } else {
+                videoPlayer.pause();
+                playPauseIcon.className = 'fas fa-play';
+            }
+        }
+
+        function skipForward() {
+            videoPlayer.currentTime += 10;
+        }
+
+        function toggleMute() {
+            videoPlayer.muted = !videoPlayer.muted;
+            volumeIcon.className = videoPlayer.muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+        }
+
+        // Initialize video player events
+        if (videoPlayer) {
+            videoPlayer.addEventListener('timeupdate', updateVideoProgress);
+            videoPlayer.addEventListener('play', () => {
+                playPauseIcon.className = 'fas fa-pause';
+            });
+            videoPlayer.addEventListener('pause', () => {
+                playPauseIcon.className = 'fas fa-play';
+            });
+            videoPlayer.addEventListener('loadedmetadata', () => {
+                totalTime.textContent = formatTime(videoPlayer.duration);
+            });
+        }
+
+        // Search functionality
+        function toggleSearch() {
+            searchOverlay.classList.toggle('hidden');
+            if (!searchOverlay.classList.contains('hidden')) {
+                searchInput.focus();
+                handleSearch();
+            }
+        }
+
+        function handleSearch() {
+            const query = searchInput.value.toLowerCase();
+            searchResults.innerHTML = '';
+            
+            if (query.length === 0) {
+                searchResults.innerHTML = '<p class="text-gray-500 text-center py-8">Start typing to search...</p>';
+                return;
+            }
+            
+            const results = searchData.filter(item => 
+                item.title.toLowerCase().includes(query) ||
+                item.genre.toLowerCase().includes(query) ||
+                item.type.toLowerCase().includes(query)
+            );
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = '<p class="text-gray-500 text-center py-8">No results found</p>';
+                return;
+            }
+            
+            results.forEach(item => {
+                const resultElement = document.createElement('div');
+                resultElement.className = 'search-result p-4 rounded-lg cursor-pointer';
+                resultElement.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-semibold">${item.title}</h4>
+                            <p class="text-sm text-gray-400">${item.type} • ${item.genre} • ${item.year}</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-500"></i>
+                    </div>
+                `;
+                resultElement.onclick = () => {
+                    alert(`Selected: ${item.title}`);
+                    toggleSearch();
+                };
+                searchResults.appendChild(resultElement);
+            });
+        }
+
+        // Profile dropdown
+        function toggleProfileMenu() {
+            profileDropdown.classList.toggle('hidden');
+        }
+
+        // Notifications
+        function toggleNotifications() {
+            notificationsPanel.classList.toggle('hidden');
+            notificationsVisible = !notificationsVisible;
+        }
+
+        // Download manager
+        function toggleDownloadManager() {
+            downloadManager.classList.toggle('hidden');
+            downloadManagerVisible = !downloadManagerVisible;
+        }
+
+        function downloadMovie() {
+            alert('Download started! The movie will be available offline shortly.');
+            if (!downloadManagerVisible) {
+                toggleDownloadManager();
+            }
+        }
+
+        // Video player
+        function playVideo() {
+            playerModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePlayer() {
+            playerModal.style.display = 'none';
+            videoPlayer.pause();
+            document.body.style.overflow = 'auto';
+        }
+
+        function togglePlaybackSpeed() {
+            const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+            const currentIndex = speeds.indexOf(playbackSpeed);
+            playbackSpeed = speeds[(currentIndex + 1) % speeds.length];
+            document.getElementById('speedDisplay').textContent = playbackSpeed + 'x';
+            videoPlayer.playbackRate = playbackSpeed;
+        }
+
+        function toggleQuality() {
+            const qualities = ['480p', '720p', '1080p', '4K'];
+            const currentIndex = qualities.indexOf(quality);
+            quality = qualities[(currentIndex + 1) % qualities.length];
+            document.getElementById('qualityDisplay').textContent = quality;
+        }
+
+        function toggleSubtitles() {
+            subtitlesEnabled = !subtitlesEnabled;
+            const btn = document.querySelector('[onclick="toggleSubtitles()"]');
+            if (subtitlesEnabled) {
+                btn.classList.add('gradient-bg');
+            } else {
+                btn.classList.remove('gradient-bg');
+            }
+        }
+
+        function skipIntro() {
+            videoPlayer.currentTime += 45;
+            showToast('Intro skipped!');
+        }
+
+        // Movie details
+        function showDetails() {
+            detailsModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDetails() {
+            detailsModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Watchlist functionality
+        function addToWatchlist() {
+            isWatchlisted = true;
+            updateWatchlistButton();
+            showToast('Added to My List');
+        }
+
+        function removeFromWatchlist(button) {
+            button.closest('.flex-shrink-0').remove();
+            showToast('Removed from My List');
+        }
+
+        function toggleWatchlist() {
+            isWatchlisted = !isWatchlisted;
+            updateWatchlistButton();
+            showToast(isWatchlisted ? 'Added to My List' : 'Removed from My List');
+        }
+
+        function updateWatchlistButton() {
+            const icon = document.getElementById('watchlistIcon');
+            const text = document.getElementById('watchlistText');
+            
+            if (isWatchlisted) {
+                icon.className = 'fas fa-check';
+                text.textContent = 'In My List';
+            } else {
+                icon.className = 'fas fa-plus';
+                text.textContent = 'Add to My List';
+            }
+        }
+
+        // Subscription management
+        function manageSubscription() {
+            alert('Redirecting to subscription management...');
+            closeBanner();
+        }
+
+        function closeBanner() {
+            subscriptionBanner.style.display = 'none';
+        }
+
+        // View downloads
+        function viewDownloads() {
+            alert('Opening downloads page...');
+        }
+
+        // Toast notifications
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-xl z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Video hover play functionality
+        document.querySelectorAll('.video-thumbnail video').forEach(video => {
+            video.addEventListener('mouseenter', function() {
+                this.play();
+            });
+            
+            video.addEventListener('mouseleave', function() {
+                this.pause();
+                this.currentTime = 0;
+            });
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target === playerModal) {
+                closePlayer();
+            }
+            if (event.target === detailsModal) {
+                closeDetails();
+            }
+            if (!event.target.closest('#profileDropdown') && !event.target.closest('.group button')) {
+                profileDropdown.classList.add('hidden');
+            }
+            if (!event.target.closest('#notificationsPanel') && !event.target.closest('.relative button')) {
+                notificationsPanel.classList.add('hidden');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Show subscription banner after 5 seconds
+            setTimeout(() => {
+                subscriptionBanner.style.display = 'block';
+            }, 5000);
+            
+            // Initialize search results
+            handleSearch();
+        });
+    </script>
+</body>
+</html>
