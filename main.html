@@ -8,6 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <!-- Custom Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -184,6 +187,65 @@
             gap: 0.25rem;
         }
         
+        /* Intro Video Modal Styles */
+        .intro-modal {
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+        }
+        
+        .intro-video-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .intro-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .skip-intro-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .skip-intro-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .intro-progress {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .intro-progress-fill {
+            height: 100%;
+            background: var(--primary-green);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
         /* Mobile Responsive Improvements */
         @media (max-width: 768px) {
             .modal-content {
@@ -227,6 +289,19 @@
             .desktop-nav {
                 display: none !important;
             }
+            
+            .skip-intro-btn {
+                bottom: 20px;
+                right: 20px;
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            
+            .intro-progress {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -247,6 +322,13 @@
             .profile-dropdown {
                 right: 0;
                 width: 200px;
+            }
+            
+            .skip-intro-btn {
+                bottom: 15px;
+                right: 15px;
+                padding: 6px 12px;
+                font-size: 12px;
             }
         }
         
@@ -313,6 +395,22 @@
     </style>
 </head>
 <body class="bg-gray-900 text-white">
+    <!-- Intro Video Modal -->
+    <div id="introModal" class="modal intro-modal">
+        <div class="intro-video-container">
+            <video id="introVideo" class="intro-video" playsinline>
+                <source src="intro.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <button id="skipIntroBtn" class="skip-intro-btn" onclick="skipIntroVideo()">
+                Skip Intro <span id="skipCountdown">(5)</span>
+            </button>
+            <div class="intro-progress">
+                <div id="introProgressFill" class="intro-progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- View All Modal -->
     <div id="viewAllModal" class="modal">
         <div class="modal-content">
@@ -722,10 +820,10 @@
                         </div>
                     </div>
                     
-                    <!-- Skip Intro Button -->
-                    <button onclick="skipIntro()" class="w-full py-3 gradient-bg rounded-lg font-semibold flex items-center justify-center space-x-2">
+                    <!-- Skip Intro Button (Now used for movie intro) -->
+                    <button onclick="skipMovieIntro()" class="w-full py-3 gradient-bg rounded-lg font-semibold flex items-center justify-center space-x-2">
                         <i class="fas fa-forward"></i>
-                        <span>Skip Intro (0:45)</span>
+                        <span id="skipMovieIntroText">Skip Intro (0:45)</span>
                     </button>
                 </div>
             </div>
@@ -942,9 +1040,33 @@
     </footer>
 
     <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_yOh7N1zVsGNhUQQwCyUUvjIgVdge_LQ",
+            authDomain: "mtprime-51d91.firebaseapp.com",
+            projectId: "mtprime-51d91",
+            storageBucket: "mtprime-51d91.firebasestorage.app",
+            messagingSenderId: "987560990642",
+            appId: "1:987560990642:web:2bdda54b810d87a94f36ab",
+            measurementId: "G-GMCQVW1Q44"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        
         // Current user
-                 // Current user
         let currentUser = null;
+        
+        // Intro video state
+        let isIntroPlaying = false;
+        let introVideoDuration = 0;
+        let skipIntroCountdown = 5;
+        let skipIntroInterval = null;
+        let introProgressInterval = null;
+        let nextVideoAfterIntro = null;
         
         // Content data with video URLs
         const viewAllContentData = {
@@ -1256,16 +1378,122 @@
         const mobileUserEmail = document.getElementById('mobileUserEmail');
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileMenuBackdrop = document.getElementById('mobileMenuBackdrop');
+        const introModal = document.getElementById('introModal');
+        const introVideo = document.getElementById('introVideo');
+        const skipIntroBtn = document.getElementById('skipIntroBtn');
+        const skipCountdown = document.getElementById('skipCountdown');
+        const introProgressFill = document.getElementById('introProgressFill');
+
+        // Intro Video Functions
+        function playIntroVideo(videoSrc, videoTitle) {
+            isIntroPlaying = true;
+            nextVideoAfterIntro = { src: videoSrc, title: videoTitle };
+            
+            // Reset skip button
+            skipIntroCountdown = 5;
+            skipCountdown.textContent = `(${skipIntroCountdown})`;
+            skipIntroBtn.disabled = false;
+            
+            // Show intro modal
+            introModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Play intro video
+            introVideo.play();
+            
+            // Start countdown for skip button
+            skipIntroInterval = setInterval(() => {
+                skipIntroCountdown--;
+                skipCountdown.textContent = `(${skipIntroCountdown})`;
+                
+                if (skipIntroCountdown <= 0) {
+                    clearInterval(skipIntroInterval);
+                    skipIntroBtn.disabled = false;
+                    skipCountdown.textContent = '';
+                    skipIntroBtn.innerHTML = 'Skip Intro <i class="fas fa-forward ml-1"></i>';
+                }
+            }, 1000);
+            
+            // Start progress tracking
+            introProgressInterval = setInterval(updateIntroProgress, 100);
+            
+            // Listen for video end
+            introVideo.onended = function() {
+                endIntroVideo();
+            };
+        }
+
+        function updateIntroProgress() {
+            if (introVideo.duration > 0) {
+                const progress = (introVideo.currentTime / introVideo.duration) * 100;
+                introProgressFill.style.width = `${progress}%`;
+            }
+        }
+
+        function skipIntroVideo() {
+            if (skipIntroCountdown > 0) {
+                showToast(`Skip available in ${skipIntroCountdown} seconds`, 'info');
+                return;
+            }
+            endIntroVideo();
+        }
+
+        function endIntroVideo() {
+            // Clear intervals
+            clearInterval(skipIntroInterval);
+            clearInterval(introProgressInterval);
+            
+            // Hide intro modal
+            introModal.style.display = 'none';
+            isIntroPlaying = false;
+            
+            // Reset intro video
+            introVideo.pause();
+            introVideo.currentTime = 0;
+            
+            // Play the main video if there's one queued
+            if (nextVideoAfterIntro) {
+                playSpecificVideo(nextVideoAfterIntro.src, nextVideoAfterIntro.title);
+                nextVideoAfterIntro = null;
+            }
+        }
+
+        // Monitor auth state
+        auth.onAuthStateChanged((user) => {
+            console.log("Auth state in main page:", user);
+            
+            // If Firebase says no user but we have localStorage data,
+            // it means user logged out from another tab/window
+            if (!user) {
+                // Clear localStorage
+                localStorage.removeItem('mtprime_user');
+                localStorage.removeItem('mtprime_logged_in');
+                
+                // Redirect to login if we're still on main page
+                if (window.location.pathname.includes('main.html')) {
+                    window.location.href = 'index.html';
+                }
+            }
+        });
 
         // Check authentication on page load
         function checkAuth() {
-            const user = JSON.parse(localStorage.getItem('mtprime_user'));
-            if (user) {
-                currentUser = user;
+            // Check localStorage first
+            const userData = localStorage.getItem('mtprime_user');
+            const loggedIn = localStorage.getItem('mtprime_logged_in');
+            
+            if (!userData || loggedIn !== 'true') {
+                // Not logged in, redirect to login
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            try {
+                currentUser = JSON.parse(userData);
                 updateUserUI();
                 loadHomeContent();
-            } else {
-                // Redirect to login page if not logged in
+            } catch (error) {
+                console.error("Error parsing user data:", error);
                 window.location.href = 'index.html';
             }
         }
@@ -1307,14 +1535,30 @@
             }
         }
 
-        // Logout function - FIXED TO REDIRECT
-        function logout() {
-            localStorage.removeItem('mtprime_user');
-            localStorage.removeItem('mtprime_logged_in');
-            showToast('You have been logged out', 'info');
-            
-            // Redirect to login page immediately
-            window.location.href = 'index.html';
+        // Logout function - FIXED TO CLEAR FIREBASE AUTH
+        async function logout() {
+            try {
+                // Clear localStorage first
+                localStorage.removeItem('mtprime_user');
+                localStorage.removeItem('mtprime_logged_in');
+                
+                // IMPORTANT: Also clear Firebase authentication persistence
+                await auth.signOut();
+                console.log("Firebase sign out successful");
+                
+                showToast('You have been logged out', 'info');
+                
+                // Add a small delay to ensure everything is cleared
+                setTimeout(() => {
+                    // Force redirect to login page with timestamp to prevent caching
+                    window.location.href = 'index.html?logout=' + Date.now();
+                }, 500);
+                
+            } catch (error) {
+                console.error("Logout error:", error);
+                // Still redirect even if there's an error
+                window.location.href = 'index.html?logout=' + Date.now();
+            }
         }
 
         // Toggle profile menu
@@ -1380,7 +1624,7 @@
             }
             
             div.innerHTML = `
-                <div class="relative rounded-lg overflow-hidden h-48" onclick="playSpecificVideo('${item.video}', '${item.title}')">
+                <div class="relative rounded-lg overflow-hidden h-48" onclick="playSpecificVideoWithIntro('${item.video}', '${item.title}')">
                     <img src="${item.thumbnail}" alt="${item.title}" class="w-full h-full object-cover">
                     <video class="card-video" preload="none" muted loop playsinline>
                         <source src="${item.video}" type="video/mp4">
@@ -1406,7 +1650,7 @@
                 </div>
             `;
             
-            // Add hover events for video preview - FIXED
+            // Add hover events for video preview
             const video = div.querySelector('video');
             div.addEventListener('mouseenter', () => {
                 if (video && video.paused) {
@@ -1421,6 +1665,24 @@
             });
             
             return div;
+        }
+
+        // NEW: Play video with intro
+        function playSpecificVideoWithIntro(videoSrc, videoTitle) {
+            // First play the intro video
+            playIntroVideo(videoSrc, videoTitle);
+        }
+
+        // OLD: Play video directly (without intro)
+        function playSpecificVideo(videoSrc, videoTitle) {
+            currentVideo.src = videoSrc;
+            currentVideo.title = videoTitle;
+            videoSource.src = videoSrc;
+            playerTitle.textContent = videoTitle;
+            videoPlayer.load();
+            playVideo();
+            videoPlayer.play();
+            playPauseIcon.className = 'fas fa-pause';
         }
 
         // Search in View All
@@ -1532,7 +1794,7 @@
             }
             
             div.innerHTML = `
-                <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail h-48" onclick="playSpecificVideo('${item.video}', '${item.title}')">
+                <div class="relative rounded-lg overflow-hidden card-hover video-thumbnail h-48" onclick="playSpecificVideoWithIntro('${item.video}', '${item.title}')">
                     <img src="${item.thumbnail}" alt="${item.title}" class="w-full h-full object-cover">
                     <video class="card-video" preload="none" muted loop playsinline>
                         <source src="${item.video}" type="video/mp4">
@@ -1547,7 +1809,7 @@
                 </div>
             `;
             
-            // Add hover events for video preview - FIXED
+            // Add hover events for video preview
             const video = div.querySelector('video');
             const card = div.querySelector('.video-thumbnail');
             
@@ -1697,6 +1959,13 @@
 
         // Video player
         function playVideo() {
+            // Check if intro is already playing
+            if (isIntroPlaying) {
+                // If intro is playing, wait for it to finish
+                showToast('Please wait for the intro to finish', 'info');
+                return;
+            }
+            
             playerModal.style.display = 'block';
             document.body.style.overflow = 'hidden';
         }
@@ -1732,9 +2001,10 @@
             }
         }
 
-        function skipIntro() {
+        // Skip movie intro (different from platform intro)
+        function skipMovieIntro() {
             videoPlayer.currentTime += 45;
-            showToast('Intro skipped!');
+            showToast('Movie intro skipped!');
         }
 
         // Movie details
@@ -1859,6 +2129,10 @@
             if (event.target === mobileMenuBackdrop) {
                 toggleMobileMenu();
             }
+            if (event.target === introModal) {
+                // Don't close intro modal by clicking outside
+                // User must either wait or click skip button
+            }
             if (!event.target.closest('#profileDropdown') && !event.target.closest('#profileSection')) {
                 closeProfileMenu();
             }
@@ -1880,6 +2154,19 @@
             if (e.key === '/' && e.ctrlKey) {
                 e.preventDefault();
                 toggleSearch();
+            }
+            // Spacebar to play/pause video
+            if (e.key === ' ' && !e.target.matches('input, textarea')) {
+                e.preventDefault();
+                if (document.getElementById('playerModal').style.display === 'block') {
+                    togglePlayPause();
+                }
+            }
+            // 'S' key to skip intro
+            if (e.key === 's' || e.key === 'S') {
+                if (introModal.style.display === 'block') {
+                    skipIntroVideo();
+                }
             }
         });
 

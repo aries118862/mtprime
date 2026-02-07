@@ -8,11 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <!-- Firebase SDK - Updated to latest version -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <!-- Firebase Analytics -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
     <!-- Custom Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -446,9 +446,12 @@
     };
 
     // Initialize Firebase
+    console.log("Initializing Firebase...");
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const analytics = firebase.analytics();
+    
+    console.log("Firebase initialized successfully");
 
     // DOM Elements
     const authCard = document.getElementById('authCard');
@@ -463,8 +466,6 @@
 
     // Auth State
     let currentForm = 'login';
-    let passwordVisible = false;
-    let confirmPasswordVisible = false;
 
     // Custom Firebase Error Messages
     const errorMessages = {
@@ -480,6 +481,10 @@
         'auth/popup-blocked': 'Popup was blocked. Please allow popups for this site',
         'auth/popup-closed-by-user': 'Sign in was cancelled',
         'auth/cancelled-popup-request': 'Sign in process was cancelled',
+        'auth/unauthorized-domain': 'This domain is not authorized for Google sign-in. Please check Firebase settings.',
+        'auth/operation-not-allowed': 'Google sign-in is not enabled in Firebase Console.',
+        'auth/account-exists-with-different-credential': 'An account already exists with the same email but different sign-in method.',
+        'auth/auth-domain-config-required': 'Auth domain configuration is required.',
         'default': 'An error occurred. Please try again'
     };
 
@@ -492,9 +497,11 @@
             const userData = {
                 name: user.displayName || user.email.split('@')[0],
                 email: user.email,
+                photoURL: user.photoURL || null,
                 plan: 'Trial',
                 trialDays: 7,
-                uid: user.uid
+                uid: user.uid,
+                provider: user.providerData?.[0]?.providerId || 'email'
             };
             
             // Store in localStorage for the main page
@@ -503,8 +510,13 @@
             
             console.log("User data stored in localStorage:", userData);
             
+            // Show success message
+            showToast('Login successful! Redirecting...', 'success');
+            
             // Redirect to main page
-            redirectToMainPage();
+            setTimeout(() => {
+                window.location.href = 'main.html';
+            }, 1000);
         } else {
             // User is signed out, clear localStorage and show login form
             localStorage.removeItem('mtprime_user');
@@ -515,8 +527,13 @@
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', () => {
-        // Check if user is already logged in via Firebase
-        // The auth state listener will handle the redirect if user is found
+        console.log("DOM loaded, showing login form");
+        showLogin();
+        
+        // Check if there's a redirect result for Google sign-in
+        if (auth.isSignInWithEmailLink(window.location.href)) {
+            handleEmailSignIn();
+        }
     });
 
     // Get custom error message
@@ -566,16 +583,6 @@
     // Toggle Mobile Menu
     function toggleMobileMenu() {
         mobileMenu.classList.toggle('hidden');
-    }
-
-    // Redirect to Main Page
-    function redirectToMainPage() {
-        console.log("Redirecting to main page...");
-        
-        // Add a small delay to ensure localStorage is saved
-        setTimeout(() => {
-            window.location.href = 'main.html';
-        }, 500);
     }
 
     // Show Login Form
@@ -629,6 +636,12 @@
                     <i class="fab fa-google"></i>
                     <span>Sign in with Google</span>
                 </button>
+                
+                <div class="mt-4 text-center">
+                    <a href="#" onclick="testGoogleSignIn()" class="text-sm text-gray-400 hover:text-white">
+                        Testing Google Sign-in
+                    </a>
+                </div>
                 
                 <div class="text-center mt-6 pt-4 border-t border-gray-800">
                     <p class="text-gray-400">
@@ -862,10 +875,7 @@
             // Log analytics event
             analytics.logEvent('login', { method: 'email' });
             
-            // Show success message
-            showToast('Login successful! Redirecting...', 'success');
-            
-            // The auth state listener will handle the redirect and localStorage setting
+            // Success message shown in auth state listener
             
         } catch (error) {
             hideLoading();
@@ -927,7 +937,7 @@
             
             showToast('Account created successfully! Welcome to mtprime!', 'success');
             
-            // The auth state listener will handle the redirect and localStorage setting
+            // The auth state listener will handle the redirect
             
         } catch (error) {
             hideLoading();
@@ -987,27 +997,117 @@
         }
     }
 
-    // Sign in with Google
+    // Sign in with Google - IMPROVED VERSION
     async function signInWithGoogle() {
         showLoading();
         
         try {
+            console.log("Starting Google sign-in...");
+            
             const provider = new firebase.auth.GoogleAuthProvider();
-            provider.addScope('profile');
+            
+            // Add custom parameters
+            provider.setCustomParameters({
+                prompt: 'select_account'
+            });
+            
+            // Add scopes
             provider.addScope('email');
+            provider.addScope('profile');
+            
+            console.log("Google provider created, calling signInWithPopup...");
             
             // Sign in with popup
-            await auth.signInWithPopup(provider);
+            const result = await auth.signInWithPopup(provider);
+            const user = result.user;
+            
+            console.log("Google sign-in successful:", user);
             
             // Log analytics event
             analytics.logEvent('login', { method: 'google' });
             
-            // The auth state listener will handle the redirect and localStorage setting
+            // Success message shown in auth state listener
             
         } catch (error) {
             hideLoading();
+            console.error("Google sign-in error:", error);
             
-            // Show custom error message
+            let errorMessage = getErrorMessage(error.code);
+            
+            // More specific Google sign-in errors
+            if (error.code === 'auth/popup-blocked') {
+                errorMessage = 'Popup blocked by browser. Please allow popups for this site and try again.';
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                errorMessage = 'Sign-in cancelled. Please try again.';
+            } else if (error.code === 'auth/unauthorized-domain') {
+                errorMessage = 'This domain is not authorized. Please check Firebase console settings.';
+            } else if (error.code === 'auth/operation-not-allowed') {
+                errorMessage = 'Google sign-in is not enabled in Firebase Console. Please enable it.';
+            }
+            
+            showToast(errorMessage, 'error');
+            
+            // Show error in form if available
+            if (currentForm === 'login') {
+                const errorDiv = document.getElementById('loginError');
+                const errorText = errorDiv.querySelector('p');
+                if (errorDiv) {
+                    errorText.textContent = errorMessage;
+                    errorDiv.classList.remove('hidden');
+                }
+            } else if (currentForm === 'register') {
+                const errorDiv = document.getElementById('registerError');
+                const errorText = errorDiv.querySelector('p');
+                if (errorDiv) {
+                    errorText.textContent = errorMessage;
+                    errorDiv.classList.remove('hidden');
+                }
+            }
+        }
+    }
+
+    // Test Google Sign-in
+    async function testGoogleSignIn() {
+        console.log("=== Testing Google Sign-in ===");
+        console.log("1. Firebase initialized:", firebase.apps.length > 0);
+        console.log("2. Auth object available:", !!auth);
+        console.log("3. Firebase config:", firebaseConfig);
+        
+        try {
+            // Test if we can create a Google provider
+            const provider = new firebase.auth.GoogleAuthProvider();
+            console.log("4. Google provider created:", provider);
+            console.log("5. Provider scopes:", provider.scopes);
+            
+            // Test popup availability
+            console.log("6. Testing popup availability...");
+            
+            showToast("Testing Google sign-in setup...", 'info');
+            
+            // Try to sign in
+            await signInWithGoogle();
+            
+        } catch (error) {
+            console.error("Test failed:", error);
+            showToast("Test failed: " + error.message, 'error');
+        }
+    }
+
+    // Handle email link sign-in
+    async function handleEmailSignIn() {
+        showLoading();
+        
+        try {
+            let email = window.localStorage.getItem('emailForSignIn');
+            if (!email) {
+                email = window.prompt('Please provide your email for confirmation');
+            }
+            
+            await auth.signInWithEmailLink(email, window.location.href);
+            window.localStorage.removeItem('emailForSignIn');
+            
+        } catch (error) {
+            hideLoading();
             showToast(getErrorMessage(error.code), 'error');
         }
     }
@@ -1028,7 +1128,24 @@
             mobileMenu.classList.add('hidden');
         }
     });
+
+    // Add keyboard shortcut for testing (Ctrl+Shift+G)
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'G') {
+            e.preventDefault();
+            testGoogleSignIn();
+        }
+    });
+    
+    // Log for debugging
+    console.log("Google Sign-in ready. Press Ctrl+Shift+G to test.");
+    console.log("Make sure Google Sign-in is enabled in Firebase Console:");
+    console.log("1. Go to https://console.firebase.google.com/");
+    console.log("2. Select project: mtprime-51d91");
+    console.log("3. Go to Authentication → Sign-in method");
+    console.log("4. Enable Google sign-in");
+    console.log("5. Add authorized domains: localhost and your deployment domain");
 </script>
     
 </body>
-</html> 
+</html>
