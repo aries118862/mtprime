@@ -572,7 +572,7 @@
             const snap = await db.collection("films").where("approval_status", "==", "approved").get();
 
             allMovies = snap.docs.map(doc => {
-                const d = doc.data();
+                const d = doc.data() || {};
                 return {
                     id: doc.id,
                     title: d.title || "Untitled",
@@ -590,18 +590,23 @@
 
             const viewsSnap = await db.collection("movie_views").get();
             const vm = {};
-            viewsSnap.forEach(d => {
-                const vd = d.data();
-                if (vd.movie_id) vm[vd.movie_id] = (vm[vd.movie_id] || 0) + 1;
+
+            viewsSnap.forEach(doc => {
+                const vd = doc.data() || {};
+                if (!vd.movie_id) return;
+                vm[vd.movie_id] = (vm[vd.movie_id] || 0) + 1;
             });
 
-            allMovies = allMovies.map(m => ({ ...m, views: vm[m.id] || 0 }));
+            allMovies = allMovies.map(m => ({
+                ...m,
+                views: vm[m.id] || 0
+            }));
 
             const ratingsSnap = await db.collection("movie_ratings").get();
             ratingsCache = {};
 
             ratingsSnap.forEach(doc => {
-                const rd = doc.data();
+                const rd = doc.data() || {};
                 const mid = rd.movie_id;
                 const rat = Number(rd.rating);
 
@@ -828,14 +833,33 @@
             }
         }
 
-        function startMainMovieAfterIntro() {
+        async function saveMovieView(movie) {
+            try {
+                await db.collection("movie_views").add({
+                    movie_id: movie.id,
+                    movie_title: movie.title || "Untitled",
+                    genre: movie.genre || "Unknown",
+                    producer_name: movie.uploader_name || "Unknown",
+                    user_email: currentUser?.email || null,
+                    viewed_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                console.log("View saved successfully:", movie.title);
+            } catch (error) {
+                console.error("Failed to save movie view:", error);
+            }
+        }
+
+        async function startMainMovieAfterIntro() {
             const player = document.getElementById("mainPlayer");
             const src = document.getElementById("playerSource");
 
             if (!queuedMovie) return;
 
+            const movieToPlay = queuedMovie;
             isPlayingIntro = false;
-            src.src = queuedMovie.video_url;
+
+            src.src = movieToPlay.video_url;
             player.load();
 
             player.play().then(() => {
@@ -843,12 +867,8 @@
                 showPlayerUI();
             }).catch(() => {});
 
-            db.collection("movie_views").add({
-                movie_id: queuedMovie.id,
-                movie_title: queuedMovie.title,
-                user_email: currentUser?.email || null,
-                viewed_at: firebase.firestore.FieldValue.serverTimestamp()
-            }).catch(console.error);
+            await saveMovieView(movieToPlay);
+            loadMovies().catch(console.error);
         }
 
         function attachPlayerEvents() {
