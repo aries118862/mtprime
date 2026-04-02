@@ -334,6 +334,36 @@
             transition: opacity 0.3s ease, visibility 0.3s;
         }
 
+        .player-loader {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 25;
+            background: rgba(0,0,0,0.28);
+            pointer-events: none;
+        }
+
+        .player-loader.show {
+            display: flex;
+        }
+
+        .loader-spinner {
+            width: 68px;
+            height: 68px;
+            border: 5px solid rgba(255,255,255,0.22);
+            border-top: 5px solid #6FCF97;
+            border-radius: 50%;
+            animation: spinLoader 0.9s linear infinite;
+            box-shadow: 0 0 20px rgba(111,207,151,0.25);
+        }
+
+        @keyframes spinLoader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .control-btn {
                 width: 38px;
@@ -484,6 +514,10 @@
                     <source id="playerSource" src="">
                 </video>
 
+                <div id="playerLoader" class="player-loader">
+                    <div class="loader-spinner"></div>
+                </div>
+
                 <div id="playerCenterPlay" class="player-center-play">
                     <button id="centerPlayBtn"><i class="fas fa-play"></i></button>
                 </div>
@@ -548,7 +582,8 @@
             playerHideTimer = null,
             isSeeking = false,
             isPlayingIntro = false,
-            queuedMovie = null;
+            queuedMovie = null,
+            playerHistoryPushed = false;
 
         const INTRO_VIDEO_URL = "intro.mp4";
 
@@ -566,6 +601,14 @@
 
         function setWatchlist(list) {
             localStorage.setItem("mtprime_watchlist", JSON.stringify(list));
+        }
+
+        function showPlayerLoader() {
+            document.getElementById("playerLoader")?.classList.add("show");
+        }
+
+        function hidePlayerLoader() {
+            document.getElementById("playerLoader")?.classList.remove("show");
         }
 
         async function loadMovies() {
@@ -801,6 +844,8 @@
         function seekBy(sec) {
             const p = document.getElementById("mainPlayer");
             if (p.duration) {
+                showPlayerLoader();
+
                 let nt = (p.currentTime || 0) + sec;
                 if (nt < 0) nt = 0;
                 if (nt > p.duration) nt = p.duration;
@@ -808,10 +853,13 @@
             }
         }
 
-        function toggleFullscreen() {
+        async function toggleFullscreen() {
             const shell = document.getElementById("playerShell");
-            if (!document.fullscreenElement) shell.requestFullscreen?.();
-            else document.exitFullscreen?.();
+            if (!document.fullscreenElement) {
+                try { await shell.requestFullscreen?.(); } catch (e) {}
+            } else {
+                try { await document.exitFullscreen?.(); } catch (e) {}
+            }
         }
 
         function showPlayerUI() {
@@ -843,8 +891,6 @@
                     user_email: currentUser?.email || null,
                     viewed_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
-
-                console.log("View saved successfully:", movie.title);
             } catch (error) {
                 console.error("Failed to save movie view:", error);
             }
@@ -860,6 +906,7 @@
             isPlayingIntro = false;
 
             src.src = movieToPlay.video_url;
+            showPlayerLoader();
             player.load();
 
             player.play().then(() => {
@@ -878,7 +925,13 @@
             p.addEventListener("timeupdate", updatePlayerUI);
             p.addEventListener("loadedmetadata", updatePlayerUI);
 
-            p.addEventListener("play", () => {
+            p.addEventListener("loadstart", showPlayerLoader);
+            p.addEventListener("waiting", showPlayerLoader);
+            p.addEventListener("seeking", showPlayerLoader);
+            p.addEventListener("stalled", showPlayerLoader);
+
+            p.addEventListener("playing", () => {
+                hidePlayerLoader();
                 updatePlayPauseIcon();
                 showPlayerUI();
             });
@@ -888,19 +941,37 @@
                 showPlayerUI();
             });
 
+            p.addEventListener("canplay", hidePlayerLoader);
+            p.addEventListener("canplaythrough", hidePlayerLoader);
+            p.addEventListener("seeked", () => {
+                hidePlayerLoader();
+                isSeeking = false;
+            });
+            p.addEventListener("loadeddata", hidePlayerLoader);
+
             p.addEventListener("volumechange", () => {
                 document.getElementById("muteBtn").innerHTML = p.muted
                     ? '<i class="fas fa-volume-mute"></i>'
                     : '<i class="fas fa-volume-up"></i>';
             });
 
-            p.addEventListener("ended", () => {
+            p.addEventListener("ended", async () => {
                 if (isPlayingIntro && queuedMovie) {
                     startMainMovieAfterIntro();
                     return;
                 }
+
                 updatePlayPauseIcon();
-                showPlayerUI();
+                hidePlayerLoader();
+
+                if (document.fullscreenElement) {
+                    try {
+                        await document.exitFullscreen();
+                    } catch (e) {}
+                }
+
+                closePlayerModal(false);
+                window.scrollTo({ top: 0, behavior: "smooth" });
             });
 
             p.addEventListener("click", togglePlayPause);
@@ -910,6 +981,7 @@
 
             pb.addEventListener("input", () => {
                 isSeeking = true;
+                showPlayerLoader();
                 const dur = p.duration || 0;
                 p.currentTime = (pb.value / 100) * dur;
                 updatePlayerUI();
@@ -928,25 +1000,50 @@
             isPlayingIntro = true;
 
             src.src = INTRO_VIDEO_URL;
+            showPlayerLoader();
             player.load();
 
             document.getElementById("playerModal").classList.add("show");
             showPlayerUI();
+
+            history.pushState({ playerOpen: true }, "");
+            playerHistoryPushed = true;
 
             player.play().then(() => {
                 updatePlayPauseIcon();
             }).catch(() => {});
         }
 
-        function closePlayerModal() {
+        function closePlayerModal(goBackHistory = true) {
             const p = document.getElementById("mainPlayer");
+            const src = document.getElementById("playerSource");
+
             p.pause();
             p.currentTime = 0;
 
+            if (src) src.src = "";
+            p.removeAttribute("src");
+            p.load();
+
             isPlayingIntro = false;
             queuedMovie = null;
+            isSeeking = false;
 
+            hidePlayerLoader();
+            clearTimeout(playerHideTimer);
+
+            document.getElementById("playerTopbar")?.classList.remove("hidden-ui");
+            document.getElementById("playerControls")?.classList.remove("hidden-ui");
             document.getElementById("playerModal").classList.remove("show");
+
+            if (goBackHistory && playerHistoryPushed) {
+                playerHistoryPushed = false;
+                if (history.state && history.state.playerOpen) {
+                    history.back();
+                }
+            } else if (!goBackHistory) {
+                playerHistoryPushed = false;
+            }
         }
 
         function createCard(movie) {
@@ -1135,7 +1232,7 @@
 
         document.getElementById("closeDetailModal")?.addEventListener("click", () => document.getElementById("detailsModal").classList.remove("show"));
 
-        document.getElementById("closePlayer")?.addEventListener("click", closePlayerModal);
+        document.getElementById("closePlayer")?.addEventListener("click", () => closePlayerModal(true));
         document.getElementById("playPauseBtn")?.addEventListener("click", togglePlayPause);
         document.getElementById("centerPlayBtn")?.addEventListener("click", togglePlayPause);
         document.getElementById("muteBtn")?.addEventListener("click", toggleMute);
@@ -1224,7 +1321,7 @@
 
         window.addEventListener("click", (e) => {
             if (e.target === document.getElementById("detailsModal")) document.getElementById("detailsModal").classList.remove("show");
-            if (e.target === document.getElementById("playerModal")) closePlayerModal();
+            if (e.target === document.getElementById("playerModal")) closePlayerModal(true);
             if (e.target === document.getElementById("viewAllModal")) document.getElementById("viewAllModal").classList.remove("show");
         });
 
@@ -1242,7 +1339,14 @@
             } else if (e.code === "KeyM") {
                 toggleMute();
             } else if (e.code === "Escape") {
-                closePlayerModal();
+                closePlayerModal(true);
+            }
+        });
+
+        window.addEventListener("popstate", () => {
+            const playerModal = document.getElementById("playerModal");
+            if (playerModal.classList.contains("show")) {
+                closePlayerModal(false);
             }
         });
 
