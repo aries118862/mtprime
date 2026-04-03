@@ -814,7 +814,50 @@
         }
 
         function formatTime(sec) { if (!isFinite(sec)) return "00:00"; const m = Math.floor(sec / 60), s = Math.floor(sec % 60); return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`; }
+        function setupAutoHideControls() {
+    const shell = document.getElementById("playerShell");
+    const controls = document.getElementById("playerControls");
+    const topbar = document.getElementById("playerTopbar");
+    const player = document.getElementById("mainPlayer");
 
+    let hideTimer;
+
+    function showControls() {
+        controls.classList.remove("hidden-ui");
+        topbar.classList.remove("hidden-ui");
+
+        clearTimeout(hideTimer);
+
+        hideTimer = setTimeout(() => {
+            if (!player.paused && !player.ended) {
+                controls.classList.add("hidden-ui");
+                topbar.classList.add("hidden-ui");
+                shell.style.cursor = "none"; // hide cursor
+            }
+        }, 3000);
+    }
+
+    function forceShowControls() {
+        controls.classList.remove("hidden-ui");
+        topbar.classList.remove("hidden-ui");
+        shell.style.cursor = "default";
+        clearTimeout(hideTimer);
+    }
+
+    // Activity = show controls
+    shell.addEventListener("mousemove", showControls);
+    shell.addEventListener("touchstart", showControls);
+    shell.addEventListener("click", showControls);
+
+    // When paused → always show
+    player.addEventListener("pause", forceShowControls);
+
+    // When playing → start hide timer
+    player.addEventListener("play", showControls);
+
+    // When ended → show controls
+    player.addEventListener("ended", forceShowControls);
+}
         function attachPlayerEvents() {
             const p = document.getElementById("mainPlayer");
             const pb = document.getElementById("progressBar");
@@ -864,6 +907,7 @@
         window.addEventListener("click", (e) => { if (e.target === document.getElementById("detailsModal")) document.getElementById("detailsModal").classList.remove("show"); if (e.target === document.getElementById("playerModal")) closePlayerModal(true); if (e.target === document.getElementById("viewAllModal")) document.getElementById("viewAllModal").classList.remove("show"); });
         window.addEventListener("popstate", () => { if (document.getElementById("playerModal").classList.contains("show")) closePlayerModal(false); });
         attachPlayerEvents();
+        setupAutoHideControls();
         checkAuth();
     </script>
 </body>
