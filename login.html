@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mtprime-Watch Movies Online | Login</title>
-     <link rel="icon" type="image/png" href="logo.png">
-    <!-- Tailwind CSS -->
+    <title>mtprime - Watch Movies Online | Login</title>
+    <link rel="icon" type="image/png" href="logo.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDK - Updated to latest version -->
+
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <!-- Firebase Analytics -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
-    <!-- Custom Fonts -->
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --gradient-start: #6FCF97;
@@ -23,94 +22,85 @@
             --primary-green: #27AE60;
             --dark-bg: #0f172a;
         }
-        
+
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--dark-bg);
             color: white;
             overflow-x: hidden;
         }
-        
+
         .logo-font {
             font-family: 'Montserrat', sans-serif;
         }
-        
+
         .gradient-bg {
             background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
         }
-        
+
         .gradient-text {
             background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
-        .card-hover {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
+
         .form-input {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
             transition: all 0.3s ease;
         }
-        
+
         .form-input:focus {
             border-color: var(--primary-green);
             box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
             background: rgba(255, 255, 255, 0.1);
         }
-        
+
         .google-btn {
             background: #4285F4;
             transition: all 0.3s ease;
         }
-        
+
         .google-btn:hover {
             background: #357ae8;
             transform: translateY(-2px);
         }
-        
+
         .divider {
             display: flex;
             align-items: center;
             text-align: center;
         }
-        
+
         .divider::before,
         .divider::after {
             content: '';
             flex: 1;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .divider span {
             padding: 0 15px;
         }
-        
+
         .auth-card {
             backdrop-filter: blur(20px);
             background: rgba(30, 41, 59, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
-        
+
         .success-message {
             background: rgba(39, 174, 96, 0.2);
             border: 1px solid rgba(39, 174, 96, 0.3);
         }
-        
+
         .error-message {
             background: rgba(239, 68, 68, 0.2);
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
-        
+
         .loader {
             border: 3px solid rgba(255, 255, 255, 0.1);
             border-top: 3px solid var(--primary-green);
@@ -119,43 +109,45 @@
             height: 40px;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         .password-strength {
             height: 4px;
             border-radius: 2px;
             transition: width 0.3s ease;
         }
-        
+
         .strength-0 { background: #ef4444; width: 20%; }
         .strength-1 { background: #f97316; width: 40%; }
         .strength-2 { background: #eab308; width: 60%; }
         .strength-3 { background: #84cc16; width: 80%; }
         .strength-4 { background: #22c55e; width: 100%; }
-        
+
         .input-group {
             position: relative;
         }
-        
+
         .video-container {
             position: relative;
             overflow: hidden;
         }
-        
+
         .video-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to bottom, 
-                rgba(15, 23, 42, 0.8) 0%, 
-                rgba(15, 23, 42, 0.6) 50%, 
-                rgba(15, 23, 42, 0.8) 100%);
+            background: linear-gradient(
+                to bottom,
+                rgba(15, 23, 42, 0.8) 0%,
+                rgba(15, 23, 42, 0.6) 50%,
+                rgba(15, 23, 42, 0.8) 100%
+            );
             pointer-events: none;
         }
-        
+
         .toggle-password {
             position: absolute;
             right: 15px;
@@ -167,25 +159,11 @@
             cursor: pointer;
             z-index: 10;
         }
-        
-        .form-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        @media (min-width: 1024px) {
-            .form-container {
-                min-height: auto;
-                margin-top: 2rem;
-            }
-        }
-        
+
         .brand-highlight {
             animation: glow 2s ease-in-out infinite alternate;
         }
-        
+
         @keyframes glow {
             from { text-shadow: 0 0 5px rgba(39, 174, 96, 0.5); }
             to { text-shadow: 0 0 15px rgba(39, 174, 96, 0.8); }
@@ -193,12 +171,9 @@
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
-    <!-- Main Container -->
     <div class="min-h-screen flex flex-col">
-        <!-- Navigation -->
         <nav class="bg-gray-900/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-800">
             <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-                <!-- Logo -->
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
                         <img src="logo.png" alt="mtprime logo" class="w-full h-full object-contain">
@@ -207,24 +182,21 @@
                         <span class="text-white">mt</span><span class="text-green-500 brand-highlight">prime</span>
                     </div>
                 </div>
-                
-                <!-- Auth Links - Simplified -->
+
                 <div class="hidden md:flex items-center space-x-3">
                     <span class="text-gray-400">Not a member?</span>
                     <button onclick="showRegister()" class="px-5 py-2 gradient-bg rounded-full font-semibold hover:opacity-90 transition text-sm">
                         Sign Up
                     </button>
                 </div>
-                
-                <!-- Mobile Menu -->
+
                 <div class="md:hidden">
                     <button onclick="toggleMobileMenu()" class="text-gray-400 hover:text-white">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
-            
-            <!-- Mobile Menu Dropdown -->
+
             <div id="mobileMenu" class="md:hidden hidden bg-gray-800 border-t border-gray-700">
                 <div class="px-4 py-3 space-y-3">
                     <button onclick="showLogin()" class="w-full py-3 gradient-bg rounded-lg font-semibold">
@@ -237,36 +209,28 @@
             </div>
         </nav>
 
-        <!-- Hero Section with Form Priority -->
         <section class="relative flex-grow overflow-hidden">
-            <!-- Background Video -->
             <div class="absolute inset-0 z-0 video-container">
                 <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-50">
                     <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
                 </video>
                 <div class="video-overlay"></div>
             </div>
-            
+
             <div class="relative z-10">
                 <div class="container mx-auto px-4 py-8">
-                    <!-- Form First Approach -->
                     <div class="flex flex-col lg:flex-row items-start justify-center gap-8 lg:gap-16">
-                        <!-- Auth Card - PROMINENT POSITION -->
-                        <div class="w-full lg:w-5/12 xl:w-4/12 order-1 lg:order-1">
+                        <div class="w-full lg:w-5/12 xl:w-4/12 order-1">
                             <div class="sticky top-24">
                                 <div id="authCard" class="auth-card rounded-2xl p-8 mb-8">
                                     <div class="text-center mb-8">
                                         <h2 id="authTitle" class="text-3xl font-bold mb-2">Welcome to mtprime</h2>
                                         <p id="authSubtitle" class="text-gray-400">Sign in to continue streaming</p>
                                     </div>
-                                    
-                                    <!-- Dynamic Content will be loaded here -->
-                                    <div id="authContent" class="space-y-6">
-                                        <!-- Content loaded by JavaScript -->
-                                    </div>
+
+                                    <div id="authContent" class="space-y-6"></div>
                                 </div>
-                                
-                                <!-- Quick Stats -->
+
                                 <div class="grid grid-cols-3 gap-3 text-center mt-6">
                                     <div class="p-3 bg-gray-800/40 rounded-lg">
                                         <p class="text-lg font-bold text-green-400">10K+</p>
@@ -277,33 +241,31 @@
                                         <p class="text-xs text-gray-400">Series</p>
                                     </div>
                                     <div class="p-3 bg-gray-800/40 rounded-lg">
-                                        <p class="text-lg font-bold text-green-400">10k+</p>
+                                        <p class="text-lg font-bold text-green-400">10K+</p>
                                         <p class="text-xs text-gray-400">Users</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Hero Content - SECONDARY POSITION -->
-                        <div class="w-full lg:w-7/12 xl:w-8/12 order-2 lg:order-2">
+
+                        <div class="w-full lg:w-7/12 xl:w-8/12 order-2">
                             <div class="text-center lg:text-left">
                                 <div class="inline-block mb-6">
                                     <span class="px-4 py-2 gradient-bg rounded-full font-semibold text-sm">
                                         <i class="fas fa-crown mr-2"></i>PREMIUM STREAMING
                                     </span>
                                 </div>
-                                
+
                                 <h1 class="text-4xl lg:text-6xl font-bold mb-6">
                                     <span class="gradient-text">Experience</span><br>
                                     <span class="text-white">Cinematic Quality</span>
                                 </h1>
-                                
+
                                 <p class="text-lg text-gray-300 mb-8 max-w-3xl">
-                                    Immerse yourself in premium streaming with thousands of movies, series, and exclusive originals in stunning 4K. 
+                                    Immerse yourself in premium streaming with thousands of movies, series, and exclusive originals in stunning quality.
                                     Watch anywhere, anytime.
                                 </p>
-                                
-                                <!-- Features -->
+
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                                     <div class="flex items-center space-x-3 p-4 bg-gray-800/40 rounded-xl">
                                         <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
@@ -314,15 +276,17 @@
                                             <p class="text-sm text-gray-400">Uninterrupted viewing</p>
                                         </div>
                                     </div>
+
                                     <div class="flex items-center space-x-3 p-4 bg-gray-800/40 rounded-xl">
                                         <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
                                             <i class="fas fa-hd"></i>
                                         </div>
                                         <div>
-                                            <p class="font-semibold">1080p </p>
+                                            <p class="font-semibold">1080p</p>
                                             <p class="text-sm text-gray-400">Cinematic quality</p>
                                         </div>
                                     </div>
+
                                     <div class="flex items-center space-x-3 p-4 bg-gray-800/40 rounded-xl">
                                         <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
                                             <i class="fas fa-download"></i>
@@ -333,8 +297,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <!-- Video Preview -->
+
                                 <div class="mb-8 max-w-2xl">
                                     <div class="relative rounded-xl overflow-hidden border border-gray-700 shadow-2xl">
                                         <video autoplay muted loop playsinline class="w-full h-56 object-cover">
@@ -343,7 +306,7 @@
                                         <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between">
                                             <div>
                                                 <p class="font-semibold">Sample Preview</p>
-                                                <p class="text-sm text-gray-300">4K • Dolby Atmos</p>
+                                                <p class="text-sm text-gray-300">Premium Streaming</p>
                                             </div>
                                             <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
                                                 <i class="fas fa-play"></i>
@@ -351,8 +314,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <!-- More Features -->
+
                                 <div class="bg-gray-800/30 rounded-xl p-6 mb-8">
                                     <h3 class="text-xl font-bold mb-4">Why Choose mtprime?</h3>
                                     <div class="space-y-3">
@@ -363,6 +325,7 @@
                                                 <p class="text-sm text-gray-400">Original movies and series you won't find anywhere else</p>
                                             </div>
                                         </div>
+
                                         <div class="flex items-start space-x-3">
                                             <i class="fas fa-check text-green-400 mt-1"></i>
                                             <div>
@@ -370,6 +333,7 @@
                                                 <p class="text-sm text-gray-400">Stream on any device with seamless synchronization</p>
                                             </div>
                                         </div>
+
                                         <div class="flex items-start space-x-3">
                                             <i class="fas fa-check text-green-400 mt-1"></i>
                                             <div>
@@ -386,7 +350,6 @@
             </div>
         </section>
 
-        <!-- Footer -->
         <footer class="bg-gray-900/90 border-t border-gray-800 mt-12">
             <div class="container mx-auto px-4 py-8">
                 <div class="flex flex-col md:flex-row justify-between items-center">
@@ -396,14 +359,14 @@
                         </div>
                         <p class="text-gray-400">Premium streaming for everyone.</p>
                     </div>
-                    
+
                     <div class="flex space-x-6">
                         <a href="/privacy-policy/" class="text-gray-400 hover:text-white transition">Privacy Policy</a>
-                        <a href="/terms & conditions/" class="text-gray-400 hover:text-white transition">Terms of Service</a>
+                        <a href="/terms-and-conditions/" class="text-gray-400 hover:text-white transition">Terms of Service</a>
                         <a href="#" class="text-gray-400 hover:text-white transition">Help Center</a>
                     </div>
                 </div>
-                
+
                 <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
                     <p>© 2026 mtprime Streaming. All rights reserved.</p>
                 </div>
@@ -411,7 +374,6 @@
         </footer>
     </div>
 
-    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-gray-900/90 z-50 hidden flex items-center justify-center">
         <div class="text-center">
             <div class="loader mx-auto mb-4"></div>
@@ -419,7 +381,6 @@
         </div>
     </div>
 
-    <!-- Message Toast -->
     <div id="messageToast" class="fixed top-4 right-4 z-50 hidden">
         <div class="p-4 rounded-lg shadow-xl max-w-sm">
             <div class="flex items-start space-x-3">
@@ -435,185 +396,146 @@
     </div>
 
     <script>
-    // Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyB_yOh7N1zVsGNhUQQwCyUUvjIgVdge_LQ",
-        authDomain: "mtprime-51d91.firebaseapp.com",
-        projectId: "mtprime-51d91",
-        storageBucket: "mtprime-51d91.firebasestorage.app",
-        messagingSenderId: "987560990642",
-        appId: "1:987560990642:web:2bdda54b810d87a94f36ab",
-        measurementId: "G-GMCQVW1Q44"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_yOh7N1zVsGNhUQQwCyUUvjIgVdge_LQ",
+            authDomain: "mtprime-51d91.firebaseapp.com",
+            projectId: "mtprime-51d91",
+            storageBucket: "mtprime-51d91.firebasestorage.app",
+            messagingSenderId: "987560990642",
+            appId: "1:987560990642:web:2bdda54b810d87a94f36ab",
+            measurementId: "G-GMCQVW1Q44"
+        };
 
-    // Initialize Firebase
-    console.log("Initializing Firebase...");
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const analytics = firebase.analytics();
-    
-    console.log("Firebase initialized successfully");
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const analytics = firebase.analytics();
 
-    // DOM Elements
-    const authCard = document.getElementById('authCard');
-    const authContent = document.getElementById('authContent');
-    const authTitle = document.getElementById('authTitle');
-    const authSubtitle = document.getElementById('authSubtitle');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const messageToast = document.getElementById('messageToast');
-    const toastIcon = document.getElementById('toastIcon');
-    const toastMessage = document.getElementById('toastMessage');
-    const mobileMenu = document.getElementById('mobileMenu');
+        const authContent = document.getElementById('authContent');
+        const authTitle = document.getElementById('authTitle');
+        const authSubtitle = document.getElementById('authSubtitle');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const messageToast = document.getElementById('messageToast');
+        const toastIcon = document.getElementById('toastIcon');
+        const toastMessage = document.getElementById('toastMessage');
+        const mobileMenu = document.getElementById('mobileMenu');
 
-    // Auth State
-    let currentForm = 'login';
+        let currentForm = 'login';
 
-    // Custom Firebase Error Messages
-    const errorMessages = {
-        'auth/invalid-email': 'Please enter a valid email address',
-        'auth/user-disabled': 'This account has been disabled',
-        'auth/user-not-found': 'No account found with this email',
-        'auth/wrong-password': 'Incorrect password. Please try again',
-        'auth/email-already-in-use': 'This email is already registered. Please sign in instead',
-        'auth/weak-password': 'Password is too weak. Use at least 6 characters',
-        'auth/operation-not-allowed': 'Email/password accounts are not enabled',
-        'auth/too-many-requests': 'Too many attempts. Please try again later',
-        'auth/network-request-failed': 'Network error. Please check your connection',
-        'auth/popup-blocked': 'Popup was blocked. Please allow popups for this site',
-        'auth/popup-closed-by-user': 'Sign in was cancelled',
-        'auth/cancelled-popup-request': 'Sign in process was cancelled',
-        'auth/unauthorized-domain': 'This domain is not authorized for Google sign-in. Please check Firebase settings.',
-        'auth/operation-not-allowed': 'Google sign-in is not enabled in Firebase Console.',
-        'auth/account-exists-with-different-credential': 'An account already exists with the same email but different sign-in method.',
-        'auth/auth-domain-config-required': 'Auth domain configuration is required.',
-        'default': 'An error occurred. Please try again'
-    };
+        const errorMessages = {
+            'auth/invalid-email': 'Please enter a valid email address',
+            'auth/user-disabled': 'This account has been disabled',
+            'auth/user-not-found': 'No account found with this email',
+            'auth/wrong-password': 'Incorrect password. Please try again',
+            'auth/email-already-in-use': 'This email is already registered. Please sign in instead',
+            'auth/weak-password': 'Password is too weak. Use at least 6 characters',
+            'auth/operation-not-allowed': 'This sign-in method is not enabled',
+            'auth/too-many-requests': 'Too many attempts. Please try again later',
+            'auth/network-request-failed': 'Network error. Please check your connection',
+            'auth/popup-blocked': 'Popup was blocked. Please allow popups for this site',
+            'auth/popup-closed-by-user': 'Google sign-in was cancelled',
+            'auth/cancelled-popup-request': 'Another popup request is already running',
+            'auth/unauthorized-domain': 'This domain is not authorized in Firebase',
+            'auth/account-exists-with-different-credential': 'This email already exists with another sign-in method',
+            'default': 'An error occurred. Please try again'
+        };
 
-    // Check auth state on page load
-    auth.onAuthStateChanged((user) => {
-        console.log("Auth state changed, user:", user);
-        
-        if (user) {
-            // User is signed in, store user data in localStorage
-            const userData = {
-                name: user.displayName || user.email.split('@')[0],
-                email: user.email,
-                photoURL: user.photoURL || null,
-                plan: 'Trial',
-                trialDays: 7,
-                uid: user.uid,
-                provider: user.providerData?.[0]?.providerId || 'email'
-            };
-            
-            // Store in localStorage for the main page
-            localStorage.setItem('mtprime_user', JSON.stringify(userData));
-            localStorage.setItem('mtprime_logged_in', 'true');
-            
-            console.log("User data stored in localStorage:", userData);
-            
-            // Show success message
-            showToast('Login successful! Redirecting...', 'success');
-            
-            // Redirect to main page
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1000);
-        } else {
-            // User is signed out, clear localStorage and show login form
-            localStorage.removeItem('mtprime_user');
-            localStorage.removeItem('mtprime_logged_in');
-            showLogin();
+        function getErrorMessage(errorCode) {
+            return errorMessages[errorCode] || errorMessages.default;
         }
-    });
 
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log("DOM loaded, showing login form");
-        showLogin();
-        
-        // Check if there's a redirect result for Google sign-in
-        if (auth.isSignInWithEmailLink(window.location.href)) {
-            handleEmailSignIn();
+        function showLoading() {
+            loadingOverlay.classList.remove('hidden');
+            loadingOverlay.classList.add('flex');
         }
-    });
 
-    // Get custom error message
-    function getErrorMessage(errorCode) {
-        return errorMessages[errorCode] || errorMessages['default'];
-    }
+        function hideLoading() {
+            loadingOverlay.classList.add('hidden');
+            loadingOverlay.classList.remove('flex');
+        }
 
-    // Show/Hide Loading
-    function showLoading() {
-        loadingOverlay.classList.remove('hidden');
-        loadingOverlay.classList.add('flex');
-    }
+        function showToast(message, type = 'info') {
+            toastMessage.textContent = message;
 
-    function hideLoading() {
-        loadingOverlay.classList.add('hidden');
-        loadingOverlay.classList.remove('flex');
-    }
-
-    // Show Message Toast
-    function showToast(message, type = 'info') {
-        toastMessage.textContent = message;
-        
-        switch(type) {
-            case 'success':
+            if (type === 'success') {
                 messageToast.className = 'fixed top-4 right-4 z-50 success-message p-4 rounded-lg shadow-xl max-w-sm';
                 toastIcon.className = 'fas fa-check-circle text-green-400 text-lg';
-                break;
-            case 'error':
+            } else if (type === 'error') {
                 messageToast.className = 'fixed top-4 right-4 z-50 error-message p-4 rounded-lg shadow-xl max-w-sm';
                 toastIcon.className = 'fas fa-exclamation-circle text-red-400 text-lg';
-                break;
-            default:
+            } else {
                 messageToast.className = 'fixed top-4 right-4 z-50 bg-gray-800 p-4 rounded-lg shadow-xl max-w-sm';
                 toastIcon.className = 'fas fa-info-circle text-blue-400 text-lg';
+            }
+
+            messageToast.classList.remove('hidden');
+            setTimeout(hideToast, 5000);
         }
-        
-        messageToast.classList.remove('hidden');
-        
-        // Auto hide after 5 seconds
-        setTimeout(hideToast, 5000);
-    }
 
-    function hideToast() {
-        messageToast.classList.add('hidden');
-    }
+        function hideToast() {
+            messageToast.classList.add('hidden');
+        }
 
-    // Toggle Mobile Menu
-    function toggleMobileMenu() {
-        mobileMenu.classList.toggle('hidden');
-    }
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('hidden');
+        }
 
-    // Show Login Form
-    function showLogin() {
-        currentForm = 'login';
-        mobileMenu.classList.add('hidden');
-        authTitle.textContent = 'Welcome Back';
-        authSubtitle.textContent = 'Sign in to continue streaming';
-        
-        authContent.innerHTML = `
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                const userData = {
+                    name: user.displayName || (user.email ? user.email.split('@')[0] : 'User'),
+                    email: user.email || '',
+                    photoURL: user.photoURL || '',
+                    plan: 'Trial',
+                    trialDays: 7,
+                    uid: user.uid,
+                    provider: user.providerData?.[0]?.providerId || 'unknown'
+                };
+
+                localStorage.setItem('mtprime_user', JSON.stringify(userData));
+                localStorage.setItem('mtprime_logged_in', 'true');
+
+                showToast('Login successful! Redirecting...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } else {
+                localStorage.removeItem('mtprime_user');
+                localStorage.removeItem('mtprime_logged_in');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showLogin();
+        });
+
+        function showLogin() {
+            currentForm = 'login';
+            mobileMenu.classList.add('hidden');
+            authTitle.textContent = 'Welcome Back';
+            authSubtitle.textContent = 'Sign in to continue streaming';
+
+            authContent.innerHTML = `
                 <div id="loginError" class="hidden error-message p-3 rounded-lg mb-4">
                     <p class="text-sm"></p>
                 </div>
-                
+
                 <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
                     <div>
                         <label class="block text-sm font-medium mb-2">Email Address</label>
-                        <input type="email" id="loginEmail" placeholder="Enter your email" 
+                        <input type="email" id="loginEmail" placeholder="Enter your email"
                                class="w-full form-input rounded-lg py-3 px-4 focus:outline-none" required>
                     </div>
-                    
+
                     <div class="input-group">
                         <label class="block text-sm font-medium mb-2">Password</label>
-                        <input type="password" id="loginPassword" placeholder="Enter your password" 
+                        <input type="password" id="loginPassword" placeholder="Enter your password"
                                class="w-full form-input rounded-lg py-3 px-4 focus:outline-none pr-12" required>
                         <button type="button" onclick="togglePasswordVisibility('loginPassword')" class="toggle-password">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
-                    
+
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
                             <input type="checkbox" id="rememberMe" class="mr-2">
@@ -623,73 +545,66 @@
                             Forgot password?
                         </button>
                     </div>
-                    
+
                     <button type="submit" class="w-full gradient-bg py-3 rounded-lg font-semibold hover:opacity-90 transition">
                         Sign In
                     </button>
                 </form>
-                
+
                 <div class="divider my-6">
                     <span class="text-gray-400 text-sm">Or continue with</span>
                 </div>
-                
-                <button onclick="signInWithGoogle()" class="w-full google-btn py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:shadow-lg transition">
+
+                <button type="button" onclick="signInWithGooglePopup()" class="w-full google-btn py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:shadow-lg transition">
                     <i class="fab fa-google"></i>
                     <span>Sign in with Google</span>
                 </button>
-                
-                <div class="mt-4 text-center">
-                    <a href="#" onclick="testGoogleSignIn()" class="text-sm text-gray-400 hover:text-white">
-                        Testing Google Sign-in
-                    </a>
-                </div>
-                
+
                 <div class="text-center mt-6 pt-4 border-t border-gray-800">
                     <p class="text-gray-400">
-                        Don't have an account? 
+                        Don't have an account?
                         <button onclick="showRegister()" class="text-green-400 hover:text-green-300 font-semibold">
                             Sign Up
                         </button>
                     </p>
                 </div>
             `;
-    }
+        }
 
-    // Show Register Form
-    function showRegister() {
-        currentForm = 'register';
-        mobileMenu.classList.add('hidden');
-        authTitle.textContent = 'Join mtprime';
-        authSubtitle.textContent = 'Create your account to start streaming';
-        
-        authContent.innerHTML = `
+        function showRegister() {
+            currentForm = 'register';
+            mobileMenu.classList.add('hidden');
+            authTitle.textContent = 'Join mtprime';
+            authSubtitle.textContent = 'Create your account to start streaming';
+
+            authContent.innerHTML = `
                 <div id="registerError" class="hidden error-message p-3 rounded-lg mb-4">
                     <p class="text-sm"></p>
                 </div>
-                
+
                 <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-5">
                     <div>
                         <label class="block text-sm font-medium mb-2">Full Name</label>
-                        <input type="text" id="registerName" placeholder="Enter your full name" 
+                        <input type="text" id="registerName" placeholder="Enter your full name"
                                class="w-full form-input rounded-lg py-3 px-4 focus:outline-none" required>
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-medium mb-2">Email Address</label>
-                        <input type="email" id="registerEmail" placeholder="Enter your email" 
+                        <input type="email" id="registerEmail" placeholder="Enter your email"
                                class="w-full form-input rounded-lg py-3 px-4 focus:outline-none" required>
                     </div>
-                    
+
                     <div class="input-group">
                         <label class="block text-sm font-medium mb-2">Password</label>
-                        <input type="password" id="registerPassword" placeholder="Create a password" 
-                               class="w-full form-input rounded-lg py-3 px-4 focus:outline-none pr-12" 
+                        <input type="password" id="registerPassword" placeholder="Create a password"
+                               class="w-full form-input rounded-lg py-3 px-4 focus:outline-none pr-12"
                                oninput="checkPasswordStrength(this.value)" required>
                         <button type="button" onclick="togglePasswordVisibility('registerPassword')" class="toggle-password">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
-                    
+
                     <div id="passwordStrength" class="hidden">
                         <div class="flex justify-between text-xs mb-1">
                             <span>Password strength:</span>
@@ -697,456 +612,299 @@
                         </div>
                         <div class="password-strength strength-0" id="strengthBar"></div>
                     </div>
-                    
+
                     <div class="input-group">
                         <label class="block text-sm font-medium mb-2">Confirm Password</label>
-                        <input type="password" id="registerConfirmPassword" placeholder="Confirm your password" 
+                        <input type="password" id="registerConfirmPassword" placeholder="Confirm your password"
                                class="w-full form-input rounded-lg py-3 px-4 focus:outline-none pr-12" required>
                         <button type="button" onclick="togglePasswordVisibility('registerConfirmPassword')" class="toggle-password">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
-                    
+
                     <div class="flex items-start space-x-2">
                         <input type="checkbox" id="acceptTerms" class="mt-1" required>
                         <label for="acceptTerms" class="text-sm">
-                            I agree to the <a href="#" class="text-green-400 hover:text-green-300">Terms of Service</a> and <a href="#" class="text-green-400 hover:text-green-300">Privacy Policy</a>
+                            I agree to the
+                            <a href="/terms-and-conditions/" class="text-green-400 hover:text-green-300">Terms of Service</a>
+                            and
+                            <a href="/privacy-policy/" class="text-green-400 hover:text-green-300">Privacy Policy</a>
                         </label>
                     </div>
-                    
+
                     <button type="submit" class="w-full gradient-bg py-3 rounded-lg font-semibold hover:opacity-90 transition">
                         Create Account
                     </button>
                 </form>
-                
+
                 <div class="divider my-6">
                     <span class="text-gray-400 text-sm">Or continue with</span>
                 </div>
-                
-                <button onclick="signInWithGoogle()" class="w-full google-btn py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:shadow-lg transition">
+
+                <button type="button" onclick="signInWithGooglePopup()" class="w-full google-btn py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:shadow-lg transition">
                     <i class="fab fa-google"></i>
                     <span>Sign up with Google</span>
                 </button>
-                
+
                 <div class="text-center mt-6 pt-4 border-t border-gray-800">
                     <p class="text-gray-400">
-                        Already have an account? 
+                        Already have an account?
                         <button onclick="showLogin()" class="text-green-400 hover:text-green-300 font-semibold">
                             Sign In
                         </button>
                     </p>
                 </div>
             `;
-    }
+        }
 
-    // Show Forgot Password Form
-    function showForgotPassword() {
-        currentForm = 'forgot';
-        mobileMenu.classList.add('hidden');
-        authTitle.textContent = 'Reset Password';
-        authSubtitle.textContent = 'Enter your email to reset your password';
-        
-        authContent.innerHTML = `
+        function showForgotPassword() {
+            currentForm = 'forgot';
+            mobileMenu.classList.add('hidden');
+            authTitle.textContent = 'Reset Password';
+            authSubtitle.textContent = 'Enter your email to reset your password';
+
+            authContent.innerHTML = `
                 <div id="forgotError" class="hidden error-message p-3 rounded-lg mb-4">
                     <p class="text-sm"></p>
                 </div>
-                
+
                 <div id="forgotSuccess" class="hidden success-message p-3 rounded-lg mb-4">
                     <p class="text-sm"></p>
                 </div>
-                
+
                 <form id="forgotForm" onsubmit="handleForgotPassword(event)" class="space-y-5">
                     <div>
                         <label class="block text-sm font-medium mb-2">Email Address</label>
-                        <input type="email" id="forgotEmail" placeholder="Enter your email" 
+                        <input type="email" id="forgotEmail" placeholder="Enter your email"
                                class="w-full form-input rounded-lg py-3 px-4 focus:outline-none" required>
                     </div>
-                    
+
                     <button type="submit" class="w-full gradient-bg py-3 rounded-lg font-semibold hover:opacity-90 transition">
                         Send Reset Link
                     </button>
                 </form>
-                
+
                 <div class="text-center mt-6 pt-4 border-t border-gray-800">
                     <button onclick="showLogin()" class="text-green-400 hover:text-green-300 font-semibold">
                         ← Back to Sign In
                     </button>
                 </div>
             `;
-    }
-
-    // Toggle Password Visibility
-    function togglePasswordVisibility(fieldId) {
-        const field = document.getElementById(fieldId);
-        const icon = field.nextElementSibling.querySelector('i');
-        
-        if (field.type === 'password') {
-            field.type = 'text';
-            icon.className = 'fas fa-eye-slash';
-        } else {
-            field.type = 'password';
-            icon.className = 'fas fa-eye';
         }
-    }
 
-    // Check Password Strength
-    function checkPasswordStrength(password) {
-        const strengthDiv = document.getElementById('passwordStrength');
-        const strengthBar = document.getElementById('strengthBar');
-        const strengthText = document.getElementById('strengthText');
-        
-        if (!password) {
-            strengthDiv.classList.add('hidden');
-            return;
+        function togglePasswordVisibility(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = field.nextElementSibling.querySelector('i');
+
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
         }
-        
-        strengthDiv.classList.remove('hidden');
-        
-        let strength = 0;
-        
-        // Length check
-        if (password.length >= 8) strength++;
-        if (password.length >= 12) strength++;
-        
-        // Complexity checks
-        if (/[A-Z]/.test(password)) strength++;
-        if (/[0-9]/.test(password)) strength++;
-        if (/[^A-Za-z0-9]/.test(password)) strength++;
-        
-        // Cap strength at 4
-        strength = Math.min(strength, 4);
-        
-        // Update UI
-        strengthBar.className = `password-strength strength-${strength}`;
-        
-        switch(strength) {
-            case 0:
-            case 1:
+
+        function checkPasswordStrength(password) {
+            const strengthDiv = document.getElementById('passwordStrength');
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+
+            if (!password) {
+                strengthDiv.classList.add('hidden');
+                return;
+            }
+
+            strengthDiv.classList.remove('hidden');
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            strength = Math.min(strength, 4);
+            strengthBar.className = `password-strength strength-${strength}`;
+
+            if (strength <= 1) {
                 strengthText.textContent = 'Weak';
                 strengthText.className = 'text-red-400';
-                break;
-            case 2:
+            } else if (strength === 2) {
                 strengthText.textContent = 'Fair';
                 strengthText.className = 'text-yellow-400';
-                break;
-            case 3:
+            } else if (strength === 3) {
                 strengthText.textContent = 'Good';
                 strengthText.className = 'text-blue-400';
-                break;
-            case 4:
+            } else {
                 strengthText.textContent = 'Strong';
                 strengthText.className = 'text-green-400';
-                break;
-        }
-    }
-
-    // Handle Login
-    async function handleLogin(event) {
-        event.preventDefault();
-        
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        const rememberMe = document.getElementById('rememberMe')?.checked || false;
-        const errorDiv = document.getElementById('loginError');
-        const errorMessage = errorDiv.querySelector('p');
-        
-        // Clear previous errors
-        errorDiv.classList.add('hidden');
-        
-        // Validation
-        if (!email || !password) {
-            errorMessage.textContent = 'Please fill in all fields';
-            errorDiv.classList.remove('hidden');
-            return;
-        }
-        
-        showLoading();
-        
-        try {
-            // Set persistence
-            const persistence = rememberMe ? 
-                firebase.auth.Auth.Persistence.LOCAL : 
-                firebase.auth.Auth.Persistence.SESSION;
-            
-            await auth.setPersistence(persistence);
-            
-            // Sign in with email and password
-            await auth.signInWithEmailAndPassword(email, password);
-            
-            // Log analytics event
-            analytics.logEvent('login', { method: 'email' });
-            
-            // Success message shown in auth state listener
-            
-        } catch (error) {
-            hideLoading();
-            
-            // Show custom error message
-            errorMessage.textContent = getErrorMessage(error.code);
-            errorDiv.classList.remove('hidden');
-            showToast(errorMessage.textContent, 'error');
-        }
-    }
-
-    // Handle Registration
-    async function handleRegister(event) {
-        event.preventDefault();
-        
-        const name = document.getElementById('registerName').value;
-        const email = document.getElementById('registerEmail').value;
-        const password = document.getElementById('registerPassword').value;
-        const confirmPassword = document.getElementById('registerConfirmPassword').value;
-        const errorDiv = document.getElementById('registerError');
-        const errorMessage = errorDiv.querySelector('p');
-        
-        // Clear previous errors
-        errorDiv.classList.add('hidden');
-        
-        // Validation
-        if (!name || !email || !password || !confirmPassword) {
-            errorMessage.textContent = 'Please fill in all fields';
-            errorDiv.classList.remove('hidden');
-            return;
-        }
-        
-        if (password !== confirmPassword) {
-            errorMessage.textContent = 'Passwords do not match';
-            errorDiv.classList.remove('hidden');
-            return;
-        }
-        
-        if (password.length < 6) {
-            errorMessage.textContent = 'Password must be at least 6 characters';
-            errorDiv.classList.remove('hidden');
-            return;
-        }
-        
-        showLoading();
-        
-        try {
-            // Create user with email and password
-            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-            const user = userCredential.user;
-            
-            // Update profile with name
-            await user.updateProfile({
-                displayName: name
-            });
-            
-            // Log analytics event
-            analytics.logEvent('sign_up', { method: 'email' });
-            
-            showToast('Account created successfully! Welcome to mtprime!', 'success');
-            
-            // The auth state listener will handle the redirect
-            
-        } catch (error) {
-            hideLoading();
-            
-            // Show custom error message
-            errorMessage.textContent = getErrorMessage(error.code);
-            errorDiv.classList.remove('hidden');
-            showToast(errorMessage.textContent, 'error');
-        }
-    }
-
-    // Handle Forgot Password
-    async function handleForgotPassword(event) {
-        event.preventDefault();
-        
-        const email = document.getElementById('forgotEmail').value;
-        const errorDiv = document.getElementById('forgotError');
-        const successDiv = document.getElementById('forgotSuccess');
-        const errorMessage = errorDiv.querySelector('p');
-        const successMessage = successDiv.querySelector('p');
-        
-        // Clear previous messages
-        errorDiv.classList.add('hidden');
-        successDiv.classList.add('hidden');
-        
-        // Validation
-        if (!email) {
-            errorMessage.textContent = 'Please enter your email address';
-            errorDiv.classList.remove('hidden');
-            return;
-        }
-        
-        showLoading();
-        
-        try {
-            // Send password reset email
-            await auth.sendPasswordResetEmail(email);
-            
-            hideLoading();
-            
-            // Show success message
-            successMessage.textContent = 'Password reset email sent! Check your inbox.';
-            successDiv.classList.remove('hidden');
-            
-            // Clear form
-            document.getElementById('forgotEmail').value = '';
-            
-            showToast('Password reset email sent successfully!', 'success');
-            
-        } catch (error) {
-            hideLoading();
-            
-            // Show custom error message
-            errorMessage.textContent = getErrorMessage(error.code);
-            errorDiv.classList.remove('hidden');
-            showToast(errorMessage.textContent, 'error');
-        }
-    }
-
-    // Sign in with Google - IMPROVED VERSION
-    async function signInWithGoogle() {
-        showLoading();
-        
-        try {
-            console.log("Starting Google sign-in...");
-            
-            const provider = new firebase.auth.GoogleAuthProvider();
-            
-            // Add custom parameters
-            provider.setCustomParameters({
-                prompt: 'select_account'
-            });
-            
-            // Add scopes
-            provider.addScope('email');
-            provider.addScope('profile');
-            
-            console.log("Google provider created, calling signInWithPopup...");
-            
-            // Sign in with popup
-            const result = await auth.signInWithPopup(provider);
-            const user = result.user;
-            
-            console.log("Google sign-in successful:", user);
-            
-            // Log analytics event
-            analytics.logEvent('login', { method: 'google' });
-            
-            // Success message shown in auth state listener
-            
-        } catch (error) {
-            hideLoading();
-            console.error("Google sign-in error:", error);
-            
-            let errorMessage = getErrorMessage(error.code);
-            
-            // More specific Google sign-in errors
-            if (error.code === 'auth/popup-blocked') {
-                errorMessage = 'Popup blocked by browser. Please allow popups for this site and try again.';
-            } else if (error.code === 'auth/popup-closed-by-user') {
-                errorMessage = 'Sign-in cancelled. Please try again.';
-            } else if (error.code === 'auth/unauthorized-domain') {
-                errorMessage = 'This domain is not authorized. Please check Firebase console settings.';
-            } else if (error.code === 'auth/operation-not-allowed') {
-                errorMessage = 'Google sign-in is not enabled in Firebase Console. Please enable it.';
-            }
-            
-            showToast(errorMessage, 'error');
-            
-            // Show error in form if available
-            if (currentForm === 'login') {
-                const errorDiv = document.getElementById('loginError');
-                const errorText = errorDiv.querySelector('p');
-                if (errorDiv) {
-                    errorText.textContent = errorMessage;
-                    errorDiv.classList.remove('hidden');
-                }
-            } else if (currentForm === 'register') {
-                const errorDiv = document.getElementById('registerError');
-                const errorText = errorDiv.querySelector('p');
-                if (errorDiv) {
-                    errorText.textContent = errorMessage;
-                    errorDiv.classList.remove('hidden');
-                }
             }
         }
-    }
 
-    // Test Google Sign-in
-    async function testGoogleSignIn() {
-        console.log("=== Testing Google Sign-in ===");
-        console.log("1. Firebase initialized:", firebase.apps.length > 0);
-        console.log("2. Auth object available:", !!auth);
-        console.log("3. Firebase config:", firebaseConfig);
-        
-        try {
-            // Test if we can create a Google provider
-            const provider = new firebase.auth.GoogleAuthProvider();
-            console.log("4. Google provider created:", provider);
-            console.log("5. Provider scopes:", provider.scopes);
-            
-            // Test popup availability
-            console.log("6. Testing popup availability...");
-            
-            showToast("Testing Google sign-in setup...", 'info');
-            
-            // Try to sign in
-            await signInWithGoogle();
-            
-        } catch (error) {
-            console.error("Test failed:", error);
-            showToast("Test failed: " + error.message, 'error');
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe')?.checked || false;
+            const errorDiv = document.getElementById('loginError');
+            const errorMessage = errorDiv.querySelector('p');
+
+            errorDiv.classList.add('hidden');
+
+            if (!email || !password) {
+                errorMessage.textContent = 'Please fill in all fields';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const persistence = rememberMe
+                    ? firebase.auth.Auth.Persistence.LOCAL
+                    : firebase.auth.Auth.Persistence.SESSION;
+
+                await auth.setPersistence(persistence);
+                await auth.signInWithEmailAndPassword(email, password);
+                analytics.logEvent('login', { method: 'email' });
+            } catch (error) {
+                hideLoading();
+                errorMessage.textContent = getErrorMessage(error.code);
+                errorDiv.classList.remove('hidden');
+                showToast(errorMessage.textContent, 'error');
+            }
         }
-    }
 
-    // Handle email link sign-in
-    async function handleEmailSignIn() {
-        showLoading();
-        
-        try {
-            let email = window.localStorage.getItem('emailForSignIn');
+        async function handleRegister(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const errorDiv = document.getElementById('registerError');
+            const errorMessage = errorDiv.querySelector('p');
+
+            errorDiv.classList.add('hidden');
+
+            if (!name || !email || !password || !confirmPassword) {
+                errorMessage.textContent = 'Please fill in all fields';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (password.length < 6) {
+                errorMessage.textContent = 'Password must be at least 6 characters';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                await userCredential.user.updateProfile({ displayName: name });
+                analytics.logEvent('sign_up', { method: 'email' });
+            } catch (error) {
+                hideLoading();
+                errorMessage.textContent = getErrorMessage(error.code);
+                errorDiv.classList.remove('hidden');
+                showToast(errorMessage.textContent, 'error');
+            }
+        }
+
+        async function handleForgotPassword(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('forgotEmail').value.trim();
+            const errorDiv = document.getElementById('forgotError');
+            const successDiv = document.getElementById('forgotSuccess');
+            const errorMessage = errorDiv.querySelector('p');
+            const successMessage = successDiv.querySelector('p');
+
+            errorDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+
             if (!email) {
-                email = window.prompt('Please provide your email for confirmation');
+                errorMessage.textContent = 'Please enter your email address';
+                errorDiv.classList.remove('hidden');
+                return;
             }
-            
-            await auth.signInWithEmailLink(email, window.location.href);
-            window.localStorage.removeItem('emailForSignIn');
-            
-        } catch (error) {
-            hideLoading();
-            showToast(getErrorMessage(error.code), 'error');
-        }
-    }
 
-    // Sign out (for future use)
-    async function signOut() {
-        try {
-            await auth.signOut();
-            showToast('Signed out successfully', 'success');
-        } catch (error) {
-            showToast('Error signing out', 'error');
-        }
-    }
+            showLoading();
 
-    // Close mobile menu when clicking outside
-    document.addEventListener('click', (event) => {
-        if (!event.target.closest('#mobileMenu') && !event.target.closest('button[onclick="toggleMobileMenu()"]')) {
-            mobileMenu.classList.add('hidden');
+            try {
+                await auth.sendPasswordResetEmail(email);
+                hideLoading();
+                successMessage.textContent = 'Password reset email sent! Check your inbox.';
+                successDiv.classList.remove('hidden');
+                showToast('Password reset email sent successfully!', 'success');
+                document.getElementById('forgotEmail').value = '';
+            } catch (error) {
+                hideLoading();
+                errorMessage.textContent = getErrorMessage(error.code);
+                errorDiv.classList.remove('hidden');
+                showToast(errorMessage.textContent, 'error');
+            }
         }
-    });
 
-    // Add keyboard shortcut for testing (Ctrl+Shift+G)
-    document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.shiftKey && e.key === 'G') {
-            e.preventDefault();
-            testGoogleSignIn();
+        async function signInWithGooglePopup() {
+            showLoading();
+
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({
+                    prompt: 'select_account'
+                });
+                provider.addScope('email');
+                provider.addScope('profile');
+
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                const result = await auth.signInWithPopup(provider);
+
+                if (result.user) {
+                    analytics.logEvent('login', { method: 'google' });
+                    showToast('Google sign-in successful!', 'success');
+                }
+            } catch (error) {
+                hideLoading();
+
+                const message = getErrorMessage(error.code);
+
+                if (currentForm === 'login') {
+                    const errorDiv = document.getElementById('loginError');
+                    if (errorDiv) {
+                        errorDiv.querySelector('p').textContent = message;
+                        errorDiv.classList.remove('hidden');
+                    }
+                }
+
+                if (currentForm === 'register') {
+                    const errorDiv = document.getElementById('registerError');
+                    if (errorDiv) {
+                        errorDiv.querySelector('p').textContent = message;
+                        errorDiv.classList.remove('hidden');
+                    }
+                }
+
+                showToast(message, 'error');
+                console.error('Google popup sign-in error:', error);
+            }
         }
-    });
-    
-    // Log for debugging
-    console.log("Google Sign-in ready. Press Ctrl+Shift+G to test.");
-    console.log("Make sure Google Sign-in is enabled in Firebase Console:");
-    console.log("1. Go to https://console.firebase.google.com/");
-    console.log("2. Select project: mtprime-51d91");
-    console.log("3. Go to Authentication → Sign-in method");
-    console.log("4. Enable Google sign-in");
-    console.log("5. Add authorized domains: localhost and your deployment domain");
-</script>
-    
+
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('#mobileMenu') && !event.target.closest('button[onclick="toggleMobileMenu()"]')) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>
