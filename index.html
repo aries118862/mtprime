@@ -527,7 +527,22 @@
 
     <div id="viewAllModal" class="modal"><div class="modal-content p-5"><div class="flex justify-between items-center mb-5"><h3 id="viewAllTitle" class="text-2xl font-bold">All Movies</h3><button id="closeViewAll"><i class="fas fa-times text-xl"></i></button></div><div id="genreFilterBar" class="mb-4 flex flex-wrap gap-2"></div><input type="text" id="viewAllSearch" placeholder="Search title, genre..." class="w-full bg-gray-800 rounded-xl p-3 mb-4 border border-gray-700"><div id="viewAllGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5"></div><div class="text-center mt-6"><button id="loadMoreBtn" class="gradient-bg px-6 py-2 rounded-full">Load More</button></div></div></div>
 
-    <footer class="bg-[#05050a] border-t border-gray-800 mt-16 py-12"><div class="container mx-auto px-5 text-center text-gray-500 text-xs">© 2026 mtprime — Next-Gen Streaming Experience</div></footer>
+    <footer class="bg-[#05050a] border-t border-gray-800 mt-16 py-12">
+    <div class="container mx-auto px-5 text-center text-gray-500 text-xs space-y-4">
+
+        <!-- Links -->
+        <div class="flex justify-center space-x-6">
+            <a href="/terms & conditions/" class="hover:text-white transition">Terms & Conditions</a> 
+            <a href="/privacy-policy/" class="hover:text-white transition">Privacy Policy</a> 
+        </div>
+
+        <!-- Copyright -->
+        <div>
+            © 2026 mtprime — Next-Gen Streaming Experience
+        </div>
+
+    </div>
+</footer>
 
     <script>
         const firebaseConfig = {
