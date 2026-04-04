@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="mtprime - Premium streaming platform with trending movies, top-rated content, and personalized watchlists. Watch the latest films in HD quality.">
+<meta name="keywords" content="streaming movies, watch online, mtprime, premium streaming, movies 2026, trending films">
+<meta name="author" content="mtprime">
+<meta name="robots" content="index, follow">
+<meta name="googlebot" content="index, follow">
+<link rel="canonical" href="https://mtprime.live/">
+  <link rel="icon" type="image/png" href="logo.png">
+    <title>mtprime-Watch Movies Online</title>
+
+    <!-- Tailwind + Font Awesome + Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #6FCF97, #2F80ED);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #6FCF97, #2F80ED);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.94);
+            z-index: 1000;
+            backdrop-filter: blur(12px);
+            overflow-y: auto;
+        }
+
+        .modal.show {
+            display: block;
+        }
+
+        .modal-content {
+            background: #12121c;
+            border-radius: 32px;
+            max-width: 980px;
+            margin: 2rem auto;
+            animation: fadeUp 0.3s ease;
+            width: 95%;
+            border: 1px solid rgba(111, 207, 151, 0.2);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-row {
+            display: flex;
+            overflow-x: auto;
+            gap: 1.2rem;
+            padding: 1rem 0;
+            scrollbar-width: thin;
+            scroll-behavior: smooth;
+        }
+
+        .content-row::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        .content-row::-webkit-scrollbar-thumb {
+            background: #6FCF97;
+            border-radius: 10px;
+        }
+
+        .video-thumbnail {
+            position: relative;
+            cursor: pointer;
+            border-radius: 18px;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .video-thumbnail:hover {
+            transform: scale(1.02);
+        }
+
+        .play-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s;
+            backdrop-filter: blur(4px);
+        }
+
+        .video-thumbnail:hover .play-overlay {
+            opacity: 1;
+        }
+
+        .star-rating {
+            display: inline-flex;
+            gap: 8px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 14px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
+        }
+
+        .star-rating i {
+            font-size: 1.6rem;
+            transition: transform 0.1s;
+        }
+
+        .star-rating i:hover {
+            transform: scale(1.12);
+        }
+
+        .star-active {
+            color: #fbbf24;
+            text-shadow: 0 0 6px rgba(251, 191, 36, 0.5);
+        }
+
+        .star-inactive {
+            color: #6b7280;
+        }
+
+        .toast {
+            animation: slideUp 0.3s ease;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3000;
+            background: #1e293b;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border-left: 4px solid #6FCF97;
+            backdrop-filter: blur(8px);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .filter-chip {
+            border: 1px solid #334155;
+            background: #111827;
+            color: #cbd5e1;
+            padding: 8px 18px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(135deg, #6FCF97, #2F80ED);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(47, 128, 237, 0.3);
+        }
+
+        .custom-player-shell {
+            position: relative;
+            width: 100%;
+            background: #000000;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: black;
+        }
+
+        .custom-player-video {
+            width: 100%;
+            height: auto;
+            max-height: 85vh;
+            display: block;
+            background: #000;
+            cursor: pointer;
+            object-fit: contain;
+        }
+
+        .custom-player-shell:fullscreen {
+            background: black;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-player-shell:fullscreen .custom-player-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            max-height: none;
+        }
+
+        .custom-player-topbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: flex-end;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+            z-index: 30;
+            transition: opacity 0.25s;
+        }
+
+        .custom-player-controls {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 20px 24px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.1));
+            z-index: 30;
+            transition: opacity 0.25s;
+        }
+
+        .control-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: none;
+            color: white;
+            background: rgba(25, 25, 40, 0.85);
+            backdrop-filter: blur(6px);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1.2rem;
+        }
+
+        .control-btn:hover {
+            background: rgba(111, 207, 151, 0.7);
+            transform: scale(1.02);
+        }
+
+        .progress-wrap {
+            width: 100%;
+            margin-bottom: 14px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            appearance: none;
+            height: 6px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .progress-bar::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6FCF97;
+            cursor: pointer;
+        }
+
+        .time-label {
+            font-size: 0.9rem;
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 12px;
+            border-radius: 30px;
+        }
+
+        .player-center-play {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .player-center-play button {
+            pointer-events: auto;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            color: white;
+            font-size: 2rem;
+            transition: 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .player-center-play button:hover {
+            background: #6FCF97;
+            transform: scale(1.05);
+        }
+
+        .hidden-ui {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .player-loader {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 25;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .player-loader.show {
+            display: flex;
+        }
+
+        .loader-spinner {
+            width: 56px;
+            height: 56px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid #6FCF97;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .seek-loader-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.55);
+            padding: 20px 26px;
+            border-radius: 22px;
+            backdrop-filter: blur(10px);
+            min-width: 130px;
+        }
+
+        .loader-percent {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .loader-text {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        footer a {
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: #6FCF97;
+        }
+
+        .logo-img {
+            height: 36px;
+            width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mobileMenu" class="fixed top-0 right-0 h-full w-80 bg-[#0e0e17] z-50 transform translate-x-full transition-transform duration-300 shadow-2xl p-6 border-l border-gray-800">
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex items-center gap-2">
+                <img src="logo.png" alt="mtprime" class="logo-img">
+                <span class="text-xl font-bold"><span class="text-white">mt</span><span class="text-green-400">prime</span></span>
+            </div>
+            <button id="closeMobileBtn"><i class="fas fa-times text-2xl text-gray-400"></i></button>
+        </div>
+        <div class="mb-6 bg-[#181824] rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center font-bold"><span id="mobileProfileInitial">U</span></div>
+                <div><p id="mobileUserName" class="font-semibold">Guest</p><p id="mobileUserEmail" class="text-sm text-gray-400">Sign in to stream</p></div>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <button class="nav-show-viewall w-full text-left py-2 text-gray-300 hover:text-green-400" data-category="movies"><i class="fas fa-film mr-3 w-5"></i>Movies</button>
+            <button class="nav-show-viewall w-full text-left py-2 text-gray-300 hover:text-green-400" data-category="mylist"><i class="fas fa-heart mr-3 w-5"></i>My List</button>
+            <button class="nav-show-viewall w-full text-left py-2 text-gray-300 hover:text-green-400" data-category="trending"><i class="fas fa-chart-line mr-3 w-5"></i>Trending</button>
+            <hr class="border-gray-800">
+            <button id="mobileSignInBtn" class="w-full text-left py-2 text-green-400"><i class="fas fa-sign-in-alt mr-3 w-5"></i>Sign In</button>
+        </div>
+    </div>
+    <div id="mobileBackdrop" class="fixed inset-0 bg-black/70 z-40 hidden"></div>
+
+    <nav class="bg-[#0a0a0f]/90 backdrop-blur-md sticky top-0 z-40 border-b border-gray-800/50">
+        <div class="container mx-auto px-5 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="logo.png" alt="mtprime" class="logo-img">
+                <div class="text-xl font-bold tracking-tight"><span class="text-white">mt</span><span class="text-green-400">prime</span></div>
+            </div>
+            <div class="hidden md:flex gap-8 text-sm font-medium">
+                <button class="nav-show-viewall text-gray-300 hover:text-green-400 transition flex items-center gap-2" data-category="movies"><i class="fas fa-film"></i> Movies</button>
+                <button class="nav-show-viewall text-gray-300 hover:text-green-400 transition flex items-center gap-2" data-category="mylist"><i class="fas fa-heart"></i> My List</button>
+                <button class="nav-show-viewall text-gray-300 hover:text-green-400 transition flex items-center gap-2" data-category="trending"><i class="fas fa-chart-line"></i> Trending</button>
+            </div>
+            <div class="flex items-center gap-5">
+                <button id="searchToggle" class="text-gray-300 hover:text-green-400"><i class="fas fa-search text-xl"></i></button>
+                <button id="menuToggle" class="md:hidden text-gray-300"><i class="fas fa-bars text-xl"></i></button>
+                <div class="relative hidden md:block">
+                    <button id="profileBtn" class="flex items-center gap-2">
+                        <div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center font-bold text-sm"><span id="profileInitial">U</span></div>
+                        <div><div id="userName" class="text-sm font-medium">Guest</div><div id="userEmailMini" class="text-[11px] text-gray-400">Sign in</div></div>
+                        <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                    </button>
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-64 bg-gray-900 rounded-xl shadow-lg py-2 z-50 border border-gray-700">
+                        <div class="px-4 py-3 border-b border-gray-800"><div class="font-semibold" id="dropdownUserName">Guest</div><div class="text-sm text-gray-400" id="dropdownUserEmail">Not logged in</div></div>
+                        <button id="signInDropdownBtn" class="w-full text-left px-4 py-2 text-green-400 hover:bg-gray-800"><i class="fas fa-sign-in-alt mr-2"></i>Sign In</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="searchOverlay" class="fixed inset-0 bg-black/95 z-50 hidden backdrop-blur-md">
+        <div class="container mx-auto px-5 py-8">
+            <div class="flex justify-between mb-6"><h2 class="text-2xl font-bold"><i class="fas fa-search mr-2 text-green-400"></i>Search</h2><button id="closeSearch"><i class="fas fa-times text-2xl text-gray-400"></i></button></div>
+            <input type="text" id="searchInput" placeholder="Search by title, genre..." class="w-full bg-gray-800/90 border border-gray-700 rounded-2xl py-4 px-6 text-white text-lg focus:border-green-500 outline-none">
+            <div id="searchResults" class="mt-6 space-y-3 max-h-[60vh] overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <section class="relative h-[70vh] overflow-hidden">
+        <div class="absolute inset-0">
+            <video id="heroVideo" autoplay muted loop playsinline class="w-full h-full object-cover">
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4">
+            </video>
+            <div class="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent"></div>
+        </div>
+        <div class="relative container mx-auto px-5 h-full flex items-center">
+            <div class="max-w-2xl">
+                <h1 id="heroTitle" class="text-5xl md:text-7xl font-bold mb-4 tracking-tight">Loading...</h1>
+                <p id="heroDesc" class="text-gray-200 text-lg mb-6 line-clamp-3"></p>
+                <div class="flex gap-5">
+                    <button id="heroPlayBtn" class="px-8 py-3 gradient-bg rounded-full font-bold flex items-center gap-2 shadow-xl"><i class="fas fa-play"></i> Play Now</button>
+                    <button id="heroDetailsBtn" class="px-8 py-3 bg-white/10 backdrop-blur-sm rounded-full font-semibold border border-white/20"><i class="fas fa-info-circle mr-2"></i>Details</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container mx-auto px-5 py-12 space-y-12">
+        <section><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold"><i class="fas fa-heart text-green-400 mr-2"></i>My List</h2><button class="nav-show-viewall text-green-400 text-sm" data-category="mylist">View All →</button></div><div id="mylistRow" class="content-row"></div></section>
+        <section><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold"><i class="fas fa-fire text-orange-400 mr-2"></i>Trending Now</h2><button class="nav-show-viewall text-green-400 text-sm" data-category="trending">View All →</button></div><div id="trendingRow" class="content-row"></div></section>
+        <section><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold"><i class="fas fa-trophy text-yellow-400 mr-2"></i>Top Rated</h2><button class="nav-show-viewall text-green-400 text-sm" data-category="toprated">View All →</button></div><div id="topRatedRow" class="content-row"></div></section>
+    </div>
+
+    <div id="detailsModal" class="modal"><div class="modal-content relative p-6 md:p-8"><button id="closeDetailModal" class="absolute right-6 top-6 text-gray-400 hover:text-white text-2xl"><i class="fas fa-times"></i></button><div class="flex flex-col md:flex-row gap-7"><img id="detailPoster" class="w-full md:w-64 h-80 object-cover rounded-2xl shadow-2xl"><div class="flex-1"><h2 id="detailTitle" class="text-3xl font-bold mb-3"></h2><div class="flex items-center gap-4 mb-5 flex-wrap"><div id="starRatingComponent" class="star-rating"></div><span id="detailAvgRating" class="text-green-400 font-bold">★ 0.0</span><span id="detailRatingCount" class="text-gray-400 text-sm">(0 ratings)</span></div><div class="grid grid-cols-2 gap-3 mb-5 text-sm bg-black/30 p-4 rounded-2xl"><div><span class="text-gray-400"><i class="far fa-calendar-alt mr-1"></i> Year:</span> <span id="detailYear"></span></div><div><span class="text-gray-400"><i class="fas fa-user-tie mr-1"></i> Producer:</span> <span id="detailProducer"></span></div><div><span class="text-gray-400"><i class="fas fa-tag mr-1"></i> Genre:</span> <span id="detailGenre"></span></div><div><span class="text-gray-400"><i class="fas fa-hourglass-half mr-1"></i> Duration:</span> <span id="detailDuration"></span></div><div><span class="text-gray-400"><i class="fas fa-globe mr-1"></i> Language:</span> <span id="detailLanguage"></span></div></div><p id="detailDescription" class="text-gray-300 leading-relaxed mb-6"></p><div class="flex flex-wrap gap-4"><button id="detailPlayBtn" class="px-6 py-2.5 gradient-bg rounded-full font-bold flex items-center gap-2"><i class="fas fa-play"></i> Watch Now</button><button id="detailAddToListBtn" class="px-6 py-2.5 bg-gray-700 rounded-full font-semibold flex items-center gap-2 hover:bg-gray-600 transition"><i id="listIcon" class="fas fa-plus"></i><span id="listBtnText">Add to My List</span></button></div></div></div></div></div>
+
+    <div id="playerModal" class="modal">
+        <div class="modal-content p-0 overflow-hidden max-w-7xl w-full rounded-2xl bg-black">
+            <div id="playerShell" class="custom-player-shell">
+                <div id="playerTopbar" class="custom-player-topbar"><button id="closePlayer" class="control-btn"><i class="fas fa-times"></i></button></div>
+                <video id="mainPlayer" class="custom-player-video" playsinline preload="metadata"></video>
+                <div id="playerLoader" class="player-loader">
+                    <div class="seek-loader-box">
+                        <div class="loader-spinner"></div>
+                        <div id="loaderPercent" class="loader-percent">0%</div>
+                        <div id="loaderText" class="loader-text">Buffering...</div>
+                    </div>
+                </div>
+                <div id="playerCenterPlay" class="player-center-play"><button id="centerPlayBtn"><i class="fas fa-play"></i></button></div>
+                <div id="playerControls" class="custom-player-controls"><div class="progress-wrap"><input id="progressBar" class="progress-bar" type="range" min="0" max="100" value="0"></div><div class="flex items-center justify-between gap-3 flex-wrap"><div class="flex items-center gap-2"><button id="playPauseBtn" class="control-btn"><i class="fas fa-pause"></i></button><button id="muteBtn" class="control-btn"><i class="fas fa-volume-up"></i></button></div><div id="timeLabel" class="time-label">00:00 / 00:00</div><div class="flex items-center gap-2"><button id="backwardBtn" class="control-btn"><i class="fas fa-rotate-left"></i></button><button id="forwardBtn" class="control-btn"><i class="fas fa-rotate-right"></i></button><button id="fullscreenBtn" class="control-btn"><i class="fas fa-expand"></i></button></div></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewAllModal" class="modal"><div class="modal-content p-5"><div class="flex justify-between items-center mb-5"><h3 id="viewAllTitle" class="text-2xl font-bold">All Movies</h3><button id="closeViewAll"><i class="fas fa-times text-xl"></i></button></div><div id="genreFilterBar" class="mb-4 flex flex-wrap gap-2"></div><input type="text" id="viewAllSearch" placeholder="Search title, genre..." class="w-full bg-gray-800 rounded-xl p-3 mb-4 border border-gray-700"><div id="viewAllGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5"></div><div class="text-center mt-6"><button id="loadMoreBtn" class="gradient-bg px-6 py-2 rounded-full">Load More</button></div></div></div>
+
+    <footer class="bg-[#05050a] border-t border-gray-800 mt-16 py-12">
+    <div class="container mx-auto px-5 text-center text-gray-500 text-xs space-y-4">
+
+        <!-- Links -->
+        <div class="flex justify-center space-x-6">
+            <a href="/terms & conditions/" class="hover:text-white transition">Terms & Conditions</a> 
+            <a href="/privacy-policy/" class="hover:text-white transition">Privacy Policy</a> 
+        </div>
+
+        <!-- Copyright -->
+        <div>
+            © 2026 mtprime — Next-Gen Streaming Experience
+        </div>
+
+    </div>
+</footer>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_yOh7N1zVsGNhUQQwCyUUvjIgVdge_LQ",
+            authDomain: "mtprime-51d91.firebaseapp.com",
+            projectId: "mtprime-51d91",
+            storageBucket: "mtprime-51d91.firebasestorage.app",
+            messagingSenderId: "987560990642",
+            appId: "1:987560990642:web:2bdda54b810d87a94f36ab"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let currentUser = null, allMovies = [], ratingsCache = {}, currentMovie = null, currentViewCat = "movies", viewAllPage = 1, selectedGenreFilter = "all", PAGE_SIZE = 12;
+        let playerHideTimer = null, isSeeking = false, playerHistoryPushed = false;
+
+        function showToast(msg, type = "success") {
+            const t = document.createElement("div");
+            t.className = "toast";
+            t.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'} mr-2"></i>${msg}`;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
+        }
+
+        function getWatchlist() {
+            return JSON.parse(localStorage.getItem("mtprime_watchlist") || "[]");
+        }
+
+        function setWatchlist(list) {
+            localStorage.setItem("mtprime_watchlist", JSON.stringify(list));
+        }
+
+        function redirectToLogin() {
+            window.location.href = "login.html";
+        }
+
+        function updateUI() {
+            const logged = !!currentUser;
+            const name = currentUser?.displayName || currentUser?.name || (currentUser?.email?.split('@')[0]) || "Guest";
+            const email = currentUser?.email || "";
+            const init = name.charAt(0).toUpperCase();
+
+            ["profileInitial", "mobileProfileInitial"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = init;
+            });
+
+            document.getElementById("userName").innerText = name;
+            document.getElementById("userEmailMini").innerText = logged ? email : "Sign in";
+            document.getElementById("dropdownUserName").innerText = name;
+            document.getElementById("dropdownUserEmail").innerText = logged ? email : "Not logged in";
+            document.getElementById("mobileUserName").innerText = name;
+            document.getElementById("mobileUserEmail").innerText = logged ? email : "Not signed in";
+
+            ["mobileSignInBtn", "signInDropdownBtn"].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.style.display = logged ? "none" : "flex";
+            });
+
+            if (logged && !document.getElementById("logoutBtn")) {
+                const btn = document.createElement("button");
+                btn.id = "logoutBtn";
+                btn.className = "w-full text-left px-4 py-2 text-red-400 hover:bg-gray-800";
+                btn.innerHTML = '<i class="fas fa-sign-out-alt mr-2"></i>Sign Out';
+                btn.onclick = () => {
+                    localStorage.removeItem("mtprime_user");
+                    currentUser = null;
+                    window.location.reload();
+                };
+                document.getElementById("profileDropdown")?.appendChild(btn);
+            }
+        }
+
+        function checkAuth() {
+            const stored = localStorage.getItem("mtprime_user");
+            if (stored) {
+                try { currentUser = JSON.parse(stored); } catch (e) {}
+            }
+            updateUI();
+            loadMovies();
+        }
+
+        function requireAuthAndPlay(movie) {
+            if (!currentUser) {
+                showToast("Sign in to stream", "error");
+                redirectToLogin();
+                return false;
+            }
+            playMovie(movie);
+            return true;
+        }
+
+        function showPlayerLoader(percent = null, text = "Buffering...") {
+            const loader = document.getElementById("playerLoader");
+            if (loader) loader.classList.add("show");
+            const percentEl = document.getElementById("loaderPercent");
+            const textEl = document.getElementById("loaderText");
+            if (percentEl) percentEl.style.display = (percent !== null) ? "block" : "none";
+            if (percentEl && percent !== null) percentEl.innerText = `${percent}%`;
+            if (textEl) textEl.innerText = text;
+        }
+
+        function hidePlayerLoader() {
+            document.getElementById("playerLoader")?.classList.remove("show");
+        }
+
+        async function enterFullscreenOnPlay() {
+            const shell = document.getElementById("playerShell");
+            try {
+                if (!document.fullscreenElement) await shell.requestFullscreen();
+            } catch (e) { console.log("Fullscreen blocked:", e); }
+        }
+
+        function getBufferedPercent(player) {
+            try {
+                if (!player || !player.duration || !isFinite(player.duration) || player.buffered.length === 0) return null;
+                const bufferedEnd = player.buffered.end(player.buffered.length - 1);
+                return Math.max(0, Math.min(100, Math.round((bufferedEnd / player.duration) * 100)));
+            } catch (e) { return null; }
+        }
+
+        function updateBufferingPercent() {
+            const p = document.getElementById("mainPlayer");
+            const percent = getBufferedPercent(p);
+            const percentEl = document.getElementById("loaderPercent");
+            if (!percentEl) return;
+            if (percent === null) percentEl.style.display = "none";
+            else { percentEl.style.display = "block"; percentEl.innerText = `${percent}%`; }
+        }
+
+        async function loadMovies() {
+            const snap = await db.collection("films").where("approval_status", "==", "approved").get();
+            allMovies = snap.docs.map(doc => ({ id: doc.id, ...doc.data(), title: doc.data().title || "Untitled", video_url: doc.data().video_url || "", thumbnail_url: doc.data().thumbnail_url || "https://placehold.co/300x400" })).filter(m => m.video_url);
+            const viewsSnap = await db.collection("movie_views").get();
+            const vm = {};
+            viewsSnap.forEach(d => { if (d.data().movie_id) vm[d.data().movie_id] = (vm[d.data().movie_id] || 0) + 1; });
+            allMovies = allMovies.map(m => ({ ...m, views: vm[m.id] || 0 }));
+            const ratingsSnap = await db.collection("movie_ratings").get();
+            ratingsCache = {};
+            ratingsSnap.forEach(doc => {
+                const rd = doc.data(), mid = rd.movie_id, rat = Number(rd.rating);
+                if (mid && rat) {
+                    if (!ratingsCache[mid]) ratingsCache[mid] = { total: 0, count: 0, userRating: null };
+                    ratingsCache[mid].total += rat; ratingsCache[mid].count += 1;
+                    if (currentUser && rd.user_email === currentUser.email) ratingsCache[mid].userRating = rat;
+                }
+            });
+            Object.keys(ratingsCache).forEach(id => { ratingsCache[id].avg = ratingsCache[id].count ? (ratingsCache[id].total / ratingsCache[id].count).toFixed(1) : "0.0"; });
+            if (allMovies.length) setCurrentMovie(allMovies[0]);
+            renderAllRows(); buildGenreFilters();
+        }
+
+        function setCurrentMovie(movie) {
+            currentMovie = movie;
+            document.getElementById("heroTitle").innerText = movie.title;
+            document.getElementById("heroDesc").innerText = movie.description;
+            const heroVid = document.getElementById("heroVideo");
+            if (movie.video_url) { heroVid.innerHTML = `<source src="${movie.video_url}">`; heroVid.load(); }
+            document.getElementById("detailTitle").innerText = movie.title;
+            document.getElementById("detailYear").innerText = movie.release_year || "—";
+            document.getElementById("detailProducer").innerText = movie.uploader_name;
+            document.getElementById("detailGenre").innerText = movie.genre;
+            document.getElementById("detailDuration").innerText = movie.duration;
+            document.getElementById("detailLanguage").innerText = movie.language;
+            document.getElementById("detailDescription").innerText = movie.description;
+            document.getElementById("detailPoster").src = movie.thumbnail_url;
+            const info = ratingsCache[movie.id] || { avg: "0.0", count: 0, userRating: null };
+            document.getElementById("detailAvgRating").innerHTML = `★ ${info.avg}`;
+            document.getElementById("detailRatingCount").innerHTML = `(${info.count} ratings)`;
+            const container = document.getElementById("starRatingComponent");
+            if (container) {
+                container.innerHTML = "";
+                for (let i = 1; i <= 5; i++) {
+                    const star = document.createElement("i");
+                    star.className = (info.userRating && i <= info.userRating) ? "fas fa-star star-active" : "far fa-star star-inactive";
+                    star.style.fontSize = "1.8rem"; star.style.cursor = "pointer";
+                    star.addEventListener("click", async (e) => { e.stopPropagation(); if (!currentUser) { showToast("Login to rate", "error"); redirectToLogin(); return; } await submitRating(movie.id, i); });
+                    container.appendChild(star);
+                }
+            }
+            const inList = getWatchlist().some(w => w.id === movie.id);
+            document.getElementById("listIcon").className = inList ? "fas fa-check" : "fas fa-plus";
+            document.getElementById("listBtnText").innerText = inList ? "In My List" : "Add to My List";
+        }
+
+        async function submitRating(movieId, val) {
+            if (!currentUser) { showToast("Login to rate", "error"); redirectToLogin(); return; }
+            const existing = await db.collection("movie_ratings").where("movie_id", "==", movieId).where("user_email", "==", currentUser.email).get();
+            const batch = db.batch();
+            existing.forEach(d => batch.delete(d.ref));
+            batch.set(db.collection("movie_ratings").doc(), { movie_id: movieId, movie_title: allMovies.find(m => m.id === movieId)?.title, user_email: currentUser.email, rating: val, created_at: firebase.firestore.FieldValue.serverTimestamp() });
+            await batch.commit();
+            await loadMovies();
+            if (currentMovie && currentMovie.id === movieId) setCurrentMovie(currentMovie);
+            renderAllRows(); renderViewAll(); showToast(`Rated ${val} ★`);
+        }
+
+        function toggleWatchlist(movie) {
+            let list = getWatchlist();
+            const exists = list.find(m => m.id === movie.id);
+            if (exists) list = list.filter(m => m.id !== movie.id);
+            else list.push({ id: movie.id, title: movie.title, thumbnail: movie.thumbnail_url, video: movie.video_url, genre: movie.genre, year: movie.release_year });
+            setWatchlist(list); renderAllRows();
+            if (currentMovie && currentMovie.id === movie.id) setCurrentMovie(currentMovie);
+            showToast(exists ? `Removed "${movie.title}"` : `Added "${movie.title}"`);
+        }
+
+        function createCard(movie) {
+            const div = document.createElement("div");
+            div.className = "flex-shrink-0 w-44 md:w-52 cursor-pointer video-thumbnail rounded-xl";
+            const info = ratingsCache[movie.id] || { avg: "0.0" };
+            div.innerHTML = `<div class="relative h-64 rounded-xl overflow-hidden bg-gray-800"><img class="w-full h-full object-cover" src="${movie.thumbnail_url}"><div class="play-overlay"><div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center"><i class="fas fa-play text-white text-xl"></i></div></div><div class="absolute top-2 right-2 bg-black/60 px-2 py-0.5 rounded-full text-xs">★ ${info.avg}</div></div><div class="mt-2"><h4 class="font-semibold truncate">${movie.title}</h4><p class="text-xs text-gray-400">${movie.genre || 'Movie'} ${movie.release_year || ''}</p></div>`;
+            div.addEventListener("click", () => { setCurrentMovie(movie); document.getElementById("detailsModal").classList.add("show"); });
+            return div;
+        }
+
+        function renderAllRows() {
+            const watchIds = new Set(getWatchlist().map(w => w.id));
+            const mylist = allMovies.filter(m => watchIds.has(m.id)).slice(0, 10);
+            const trending = [...allMovies].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 10);
+            const topRated = [...allMovies].sort((a, b) => parseFloat(ratingsCache[b.id]?.avg || 0) - parseFloat(ratingsCache[a.id]?.avg || 0)).slice(0, 10);
+            document.getElementById("mylistRow").innerHTML = "";
+            document.getElementById("trendingRow").innerHTML = "";
+            document.getElementById("topRatedRow").innerHTML = "";
+            mylist.forEach(m => document.getElementById("mylistRow").appendChild(createCard(m)));
+            trending.forEach(m => document.getElementById("trendingRow").appendChild(createCard(m)));
+            topRated.forEach(m => document.getElementById("topRatedRow").appendChild(createCard(m)));
+        }
+
+        function buildGenreFilters() {
+            const bar = document.getElementById("genreFilterBar");
+            const genres = [...new Set(allMovies.map(m => (m.genre || "").trim()).filter(Boolean))];
+            bar.innerHTML = `<button class="filter-chip active" data-genre="all">All</button>`;
+            const allBtn = bar.querySelector('[data-genre="all"]');
+            allBtn?.addEventListener("click", () => { selectedGenreFilter = "all"; document.querySelectorAll("#genreFilterBar .filter-chip").forEach(b => b.classList.toggle("active", b.dataset.genre === "all")); viewAllPage = 1; renderViewAll(); });
+            genres.forEach(g => {
+                const btn = document.createElement("button");
+                btn.className = "filter-chip"; btn.innerText = g; btn.dataset.genre = g;
+                btn.addEventListener("click", () => { selectedGenreFilter = g; document.querySelectorAll("#genreFilterBar .filter-chip").forEach(b => b.classList.toggle("active", b.dataset.genre === g)); viewAllPage = 1; renderViewAll(); });
+                bar.appendChild(btn);
+            });
+        }
+
+        function getViewAllItems() {
+            if (currentViewCat === "movies") return [...allMovies];
+            if (currentViewCat === "mylist") { const ids = new Set(getWatchlist().map(w => w.id)); return allMovies.filter(m => ids.has(m.id)); }
+            if (currentViewCat === "trending") return [...allMovies].sort((a, b) => (b.views || 0) - (a.views || 0));
+            if (currentViewCat === "toprated") return [...allMovies].sort((a, b) => parseFloat(ratingsCache[b.id]?.avg || 0) - parseFloat(ratingsCache[a.id]?.avg || 0));
+            return allMovies;
+        }
+
+        function renderViewAll() {
+            let items = getViewAllItems();
+            const search = document.getElementById("viewAllSearch").value.toLowerCase();
+            if (selectedGenreFilter !== "all") items = items.filter(m => (m.genre || "").toLowerCase() === selectedGenreFilter.toLowerCase());
+            if (search) items = items.filter(m => m.title.toLowerCase().includes(search) || m.genre.toLowerCase().includes(search));
+            const paginated = items.slice(0, viewAllPage * PAGE_SIZE);
+            const grid = document.getElementById("viewAllGrid");
+            grid.innerHTML = "";
+            paginated.forEach(m => grid.appendChild(createCard(m)));
+            document.getElementById("loadMoreBtn").style.display = viewAllPage * PAGE_SIZE >= items.length ? "none" : "inline-block";
+        }
+
+        function openViewAll(cat) { currentViewCat = cat; viewAllPage = 1; selectedGenreFilter = "all"; document.getElementById("viewAllTitle").innerText = { movies: "All Movies", mylist: "My List", trending: "Trending Now", toprated: "Top Rated" }[cat]; document.getElementById("viewAllSearch").value = ""; buildGenreFilters(); renderViewAll(); document.getElementById("viewAllModal").classList.add("show"); }
+
+        function playMovie(movie) {
+            const player = document.getElementById("mainPlayer");
+            const centerPlay = document.getElementById("playerCenterPlay");
+            const progressBar = document.getElementById("progressBar");
+            const timeLabel = document.getElementById("timeLabel");
+            isSeeking = false; player.src = movie.video_url; player.currentTime = 0; progressBar.value = 0; timeLabel.innerText = "00:00 / 00:00"; player.load();
+            document.getElementById("playerModal").classList.add("show");
+            showPlayerLoader(null, "Buffering..."); centerPlay.classList.add("hidden");
+            history.pushState({ playerOpen: true }, ""); playerHistoryPushed = true;
+            player.play().then(async () => { await enterFullscreenOnPlay(); }).catch(() => { centerPlay.classList.remove("hidden"); });
+            saveMovieView(movie);
+        }
+
+        async function saveMovieView(movie) { try { await db.collection("movie_views").add({ movie_id: movie.id, movie_title: movie.title, genre: movie.genre, producer_name: movie.uploader_name, user_email: currentUser?.email || null, viewed_at: firebase.firestore.FieldValue.serverTimestamp() }); } catch (e) {} }
+
+        function closePlayerModal(goBack = true) {
+            const p = document.getElementById("mainPlayer");
+            const progressBar = document.getElementById("progressBar");
+            const timeLabel = document.getElementById("timeLabel");
+            p.pause(); p.currentTime = 0; p.src = ""; progressBar.value = 0; timeLabel.innerText = "00:00 / 00:00";
+            hidePlayerLoader(); document.getElementById("playerCenterPlay").classList.remove("hidden");
+            if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+            document.getElementById("playerModal").classList.remove("show");
+            if (goBack && playerHistoryPushed) { playerHistoryPushed = false; if (history.state?.playerOpen) history.back(); }
+        }
+
+        function formatTime(sec) { if (!isFinite(sec)) return "00:00"; const m = Math.floor(sec / 60), s = Math.floor(sec % 60); return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`; }
+        function setupAutoHideControls() {
+    const shell = document.getElementById("playerShell");
+    const controls = document.getElementById("playerControls");
+    const topbar = document.getElementById("playerTopbar");
+    const player = document.getElementById("mainPlayer");
+
+    let hideTimer;
+
+    function showControls() {
+        controls.classList.remove("hidden-ui");
+        topbar.classList.remove("hidden-ui");
+
+        clearTimeout(hideTimer);
+
+        hideTimer = setTimeout(() => {
+            if (!player.paused && !player.ended) {
+                controls.classList.add("hidden-ui");
+                topbar.classList.add("hidden-ui");
+                shell.style.cursor = "none"; // hide cursor
+            }
+        }, 3000);
+    }
+
+    function forceShowControls() {
+        controls.classList.remove("hidden-ui");
+        topbar.classList.remove("hidden-ui");
+        shell.style.cursor = "default";
+        clearTimeout(hideTimer);
+    }
+
+    // Activity = show controls
+    shell.addEventListener("mousemove", showControls);
+    shell.addEventListener("touchstart", showControls);
+    shell.addEventListener("click", showControls);
+
+    // When paused → always show
+    player.addEventListener("pause", forceShowControls);
+
+    // When playing → start hide timer
+    player.addEventListener("play", showControls);
+
+    // When ended → show controls
+    player.addEventListener("ended", forceShowControls);
+}
+        function attachPlayerEvents() {
+            const p = document.getElementById("mainPlayer");
+            const pb = document.getElementById("progressBar");
+            const tl = document.getElementById("timeLabel");
+            p.addEventListener("loadedmetadata", () => { pb.value = 0; tl.innerText = `${formatTime(0)} / ${formatTime(p.duration)}`; updateBufferingPercent(); });
+            p.addEventListener("timeupdate", () => { if (!isSeeking && p.duration) pb.value = (p.currentTime / p.duration) * 100; tl.innerText = `${formatTime(p.currentTime)} / ${formatTime(p.duration)}`; });
+            p.addEventListener("progress", updateBufferingPercent);
+            p.addEventListener("play", () => { document.getElementById("playPauseBtn").innerHTML = '<i class="fas fa-pause"></i>'; document.getElementById("playerCenterPlay").classList.add("hidden"); });
+            p.addEventListener("pause", () => { document.getElementById("playPauseBtn").innerHTML = '<i class="fas fa-play"></i>'; if (!p.ended) document.getElementById("playerCenterPlay").classList.remove("hidden"); });
+            p.addEventListener("waiting", () => { const percent = getBufferedPercent(p); showPlayerLoader(percent, "Buffering..."); });
+            p.addEventListener("seeking", () => { const percent = getBufferedPercent(p); showPlayerLoader(percent, "Buffering..."); });
+            p.addEventListener("canplay", () => { if (!p.paused) hidePlayerLoader(); });
+            p.addEventListener("playing", () => { hidePlayerLoader(); isSeeking = false; });
+            p.addEventListener("seeked", () => { isSeeking = false; if (!p.paused) hidePlayerLoader(); });
+            p.addEventListener("ended", () => { hidePlayerLoader(); document.getElementById("playPauseBtn").innerHTML = '<i class="fas fa-play"></i>'; document.getElementById("playerCenterPlay").classList.remove("hidden"); });
+            document.getElementById("playPauseBtn").onclick = async () => { if (p.paused) { try { await p.play(); await enterFullscreenOnPlay(); } catch (e) {} } else p.pause(); };
+            document.getElementById("centerPlayBtn").onclick = async () => { try { await p.play(); await enterFullscreenOnPlay(); } catch (e) {} };
+            document.getElementById("muteBtn").onclick = () => { p.muted = !p.muted; document.getElementById("muteBtn").innerHTML = p.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; };
+            document.getElementById("backwardBtn").onclick = () => { if (p.duration) { isSeeking = true; p.currentTime = Math.max(0, p.currentTime - 10); const percent = getBufferedPercent(p); showPlayerLoader(percent, "Buffering..."); } };
+            document.getElementById("forwardBtn").onclick = () => { if (p.duration) { isSeeking = true; p.currentTime = Math.min(p.duration, p.currentTime + 10); const percent = getBufferedPercent(p); showPlayerLoader(percent, "Buffering..."); } };
+            document.getElementById("fullscreenBtn").onclick = async () => { const shell = document.getElementById("playerShell"); try { if (!document.fullscreenElement) await shell.requestFullscreen(); else await document.exitFullscreen(); } catch (e) {} };
+            document.getElementById("closePlayer").onclick = () => closePlayerModal(true);
+            pb.addEventListener("input", () => { if (p.duration) { isSeeking = true; p.currentTime = (pb.value / 100) * p.duration; const percent = getBufferedPercent(p); showPlayerLoader(percent, "Buffering..."); } });
+            pb.addEventListener("change", () => { if (p.duration) { isSeeking = true; p.currentTime = (pb.value / 100) * p.duration; const percent = getBufferedPercent(p); showPlayerLoader(percent, "Buffering..."); } });
+            document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && document.getElementById("playerModal").classList.contains("show")) { document.getElementById("playerTopbar").style.opacity = "1"; document.getElementById("playerControls").style.opacity = "1"; } });
+        }
+
+        document.getElementById("heroPlayBtn")?.addEventListener("click", () => { if (currentMovie) requireAuthAndPlay(currentMovie); });
+        document.getElementById("heroDetailsBtn")?.addEventListener("click", () => { if (currentMovie) document.getElementById("detailsModal").classList.add("show"); });
+        document.getElementById("detailPlayBtn")?.addEventListener("click", () => { if (currentMovie) { document.getElementById("detailsModal").classList.remove("show"); requireAuthAndPlay(currentMovie); } });
+        document.getElementById("detailAddToListBtn")?.addEventListener("click", () => { if (currentMovie) toggleWatchlist(currentMovie); });
+        document.querySelectorAll(".nav-show-viewall").forEach(btn => btn.addEventListener("click", () => openViewAll(btn.dataset.category)));
+        document.getElementById("searchToggle").onclick = () => document.getElementById("searchOverlay").classList.remove("hidden");
+        document.getElementById("closeSearch").onclick = () => document.getElementById("searchOverlay").classList.add("hidden");
+        document.getElementById("searchInput").addEventListener("input", (e) => { const q = e.target.value.toLowerCase(); const res = allMovies.filter(m => m.title.toLowerCase().includes(q) || m.genre.toLowerCase().includes(q)); document.getElementById("searchResults").innerHTML = res.map(m => `<div class="search-result bg-gray-800/70 p-3 rounded-xl cursor-pointer hover:bg-gray-700"><div class="font-semibold">${m.title}</div><div class="text-sm text-gray-400">${m.genre}</div></div>`).join(""); document.querySelectorAll(".search-result").forEach((el, i) => el.addEventListener("click", () => { setCurrentMovie(res[i]); document.getElementById("searchOverlay").classList.add("hidden"); document.getElementById("detailsModal").classList.add("show"); })); });
+        document.getElementById("closeDetailModal")?.addEventListener("click", () => document.getElementById("detailsModal").classList.remove("show"));
+        document.getElementById("closeViewAll")?.addEventListener("click", () => document.getElementById("viewAllModal").classList.remove("show"));
+        document.getElementById("viewAllSearch")?.addEventListener("input", () => { viewAllPage = 1; renderViewAll(); });
+        document.getElementById("loadMoreBtn")?.addEventListener("click", () => { viewAllPage++; renderViewAll(); });
+        document.getElementById("profileBtn")?.addEventListener("click", () => document.getElementById("profileDropdown").classList.toggle("hidden"));
+        document.getElementById("signInDropdownBtn")?.addEventListener("click", redirectToLogin);
+        document.getElementById("mobileSignInBtn")?.addEventListener("click", redirectToLogin);
+        const menuToggle = document.getElementById("menuToggle"), mobileMenu = document.getElementById("mobileMenu"), backdrop = document.getElementById("mobileBackdrop");
+        menuToggle?.addEventListener("click", () => { mobileMenu.classList.toggle("translate-x-full"); backdrop.classList.toggle("hidden"); });
+        document.getElementById("closeMobileBtn")?.addEventListener("click", () => { mobileMenu.classList.add("translate-x-full"); backdrop.classList.add("hidden"); });
+        backdrop?.addEventListener("click", () => { mobileMenu.classList.add("translate-x-full"); backdrop.classList.add("hidden"); });
+        window.addEventListener("click", (e) => { if (e.target === document.getElementById("detailsModal")) document.getElementById("detailsModal").classList.remove("show"); if (e.target === document.getElementById("playerModal")) closePlayerModal(true); if (e.target === document.getElementById("viewAllModal")) document.getElementById("viewAllModal").classList.remove("show"); });
+        window.addEventListener("popstate", () => { if (document.getElementById("playerModal").classList.contains("show")) closePlayerModal(false); });
+        attachPlayerEvents();
+        setupAutoHideControls();
+        checkAuth();
+    </script>
+</body>
+</html>
